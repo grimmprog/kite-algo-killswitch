@@ -1,0 +1,10 @@
+start - Show welcome and all commands
+help - Display help message
+status - Quick P&L status with buttons
+pnl - Detailed P&L breakdown
+positions - View all open positions
+orders - View today's order history
+capital - Capital and risk information
+killswitch - Check kill switch status
+monitor - Position monitoring info
+close - Close all positions

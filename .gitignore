@@ -1,0 +1,64 @@
+# Environment variables (contains sensitive credentials)
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Logs
+logs/
+*.log
+
+# Screenshots and debug files
+*.png
+*.html
+segment_page_source.html
+diagnose_page_source.html
+totp_page_source.html
+
+# Access tokens
+access_token.txt
+killswitch_status.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kiro specs (optional - remove if you want to include)
+.kiro/
+
+# Temporary files
+*.tmp
+*.bak
