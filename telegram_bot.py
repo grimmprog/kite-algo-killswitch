@@ -43,6 +43,8 @@ class TradingBot:
         dp.add_handler(CommandHandler("segments", self.segments_command))
         dp.add_handler(CommandHandler("monitor", self.monitor_command))
         dp.add_handler(CommandHandler("stopmonitor", self.stopmonitor_command))
+        dp.add_handler(CommandHandler("thresholds", self.thresholds_command))
+        dp.add_handler(CommandHandler("setthreshold", self.setthreshold_command))
         
         # Capital & Risk commands
         dp.add_handler(CommandHandler("capital", self.capital_command))
@@ -86,6 +88,8 @@ class TradingBot:
             "/stopmonitor - Stop auto-monitoring\n"
             "/reactivate - Reactivate trading after kill switch\n"
             "/segments - Manage trading segments\n"
+            "/thresholds - View kill switch thresholds\n"
+            "/setthreshold - Guide to update thresholds\n"
             "/orders - View today's orders\n"
             "/history - Trade history\n\n"
             
@@ -1298,6 +1302,113 @@ class TradingBot:
         except Exception as e:
             logger.error(f"Stop monitor callback error: {e}")
             query.edit_message_text(f"❌ Error: {e}")
+    
+    def thresholds_command(self, update: Update, context: CallbackContext):
+        """Show current kill switch thresholds"""
+        try:
+            from advanced_killswitch import AdvancedKillSwitch
+            
+            ks = AdvancedKillSwitch()
+            
+            message = (
+                f"⚙️ **KILL SWITCH THRESHOLDS**\n\n"
+                f"💰 Capital: ₹{ks.capital:,}\n\n"
+                f"📉 **Loss Threshold:**\n"
+                f"   {ks.loss_display}\n\n"
+                f"📈 **Profit Threshold:**\n"
+                f"   {ks.profit_display}\n\n"
+                f"📊 **Drawdown Threshold:**\n"
+                f"   {ks.drawdown_display}\n\n"
+                f"To change thresholds:\n"
+                f"1. Edit `.env` file on server\n"
+                f"2. Restart the bot\n\n"
+                f"**Example .env settings:**\n"
+                f"```\n"
+                f"# Percentage-based (recommended)\n"
+                f"LOSS_THRESHOLD_PERCENT=10\n"
+                f"PROFIT_THRESHOLD_PERCENT=12.5\n"
+                f"DRAWDOWN_THRESHOLD_PERCENT=40\n"
+                f"CAPITAL=40000\n\n"
+                f"# OR Fixed amount\n"
+                f"# LOSS_THRESHOLD=4000\n"
+                f"# PROFIT_THRESHOLD=5000\n"
+                f"# DRAWDOWN_THRESHOLD=2000\n"
+                f"```\n\n"
+                f"💡 Percentage-based scales with your capital!"
+            )
+            
+            update.message.reply_text(message)
+            
+        except Exception as e:
+            logger.error(f"Thresholds command error: {e}")
+            update.message.reply_text(f"❌ Error: {e}")
+    
+    def setthreshold_command(self, update: Update, context: CallbackContext):
+        """Set threshold dynamically (requires restart)"""
+        if not context.args or len(context.args) < 2:
+            message = (
+                "⚙️ **SET THRESHOLD**\n\n"
+                "Usage:\n"
+                "`/setthreshold <type> <value>`\n\n"
+                "**Types:**\n"
+                "• `loss_pct` - Loss threshold %\n"
+                "• `profit_pct` - Profit threshold %\n"
+                "• `drawdown_pct` - Drawdown threshold %\n"
+                "• `loss` - Loss threshold ₹\n"
+                "• `profit` - Profit threshold ₹\n"
+                "• `drawdown` - Drawdown threshold ₹\n\n"
+                "**Examples:**\n"
+                "`/setthreshold loss_pct 10`\n"
+                "`/setthreshold profit_pct 12.5`\n"
+                "`/setthreshold drawdown_pct 40`\n"
+                "`/setthreshold loss 4000`\n\n"
+                "⚠️ **Note:** Changes require bot restart to take effect.\n"
+                "Edit `.env` file directly for permanent changes."
+            )
+            update.message.reply_text(message)
+            return
+        
+        threshold_type = context.args[0].lower()
+        try:
+            value = float(context.args[1])
+        except ValueError:
+            update.message.reply_text("❌ Invalid value. Must be a number.")
+            return
+        
+        # Map threshold types to env variable names
+        threshold_map = {
+            'loss_pct': 'LOSS_THRESHOLD_PERCENT',
+            'profit_pct': 'PROFIT_THRESHOLD_PERCENT',
+            'drawdown_pct': 'DRAWDOWN_THRESHOLD_PERCENT',
+            'loss': 'LOSS_THRESHOLD',
+            'profit': 'PROFIT_THRESHOLD',
+            'drawdown': 'DRAWDOWN_THRESHOLD'
+        }
+        
+        if threshold_type not in threshold_map:
+            update.message.reply_text(
+                f"❌ Invalid threshold type: {threshold_type}\n\n"
+                f"Valid types: {', '.join(threshold_map.keys())}"
+            )
+            return
+        
+        env_var = threshold_map[threshold_type]
+        
+        message = (
+            f"⚙️ **THRESHOLD UPDATE**\n\n"
+            f"To set `{env_var}={value}`:\n\n"
+            f"1. SSH to your server\n"
+            f"2. Edit `.env` file:\n"
+            f"   `nano ~/kite-algo/.env`\n\n"
+            f"3. Add or update:\n"
+            f"   `{env_var}={value}`\n\n"
+            f"4. Restart bot:\n"
+            f"   `sudo systemctl restart kite-trading-bot`\n\n"
+            f"5. Verify with `/thresholds`\n\n"
+            f"💡 Tip: Use percentage-based thresholds for better scaling!"
+        )
+        
+        update.message.reply_text(message)
     
     def start(self):
         """Start the bot"""

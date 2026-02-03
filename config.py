@@ -32,11 +32,22 @@ END_TIME = datetime.time(11, 15)
 AUTO_SQUARE_OFF_TIME = datetime.time(15, 15)
 
 # Risk Management
-CAPITAL = 40000
+CAPITAL = int(os.getenv("CAPITAL", 40000))
 MAX_DAILY_LOSS = 3000
 MAX_TRADES_PER_DAY = 2
 MAX_ACTIVE_TRADES = 1
 CONFIDENCE_THRESHOLD = 70
+
+# Kill Switch Thresholds (Percentage-based or Fixed)
+# Percentage takes priority if set
+LOSS_THRESHOLD_PERCENT = float(os.getenv("LOSS_THRESHOLD_PERCENT", 0))
+LOSS_THRESHOLD = float(os.getenv("LOSS_THRESHOLD", 4000))
+
+PROFIT_THRESHOLD_PERCENT = float(os.getenv("PROFIT_THRESHOLD_PERCENT", 0))
+PROFIT_THRESHOLD = float(os.getenv("PROFIT_THRESHOLD", 5000))
+
+DRAWDOWN_THRESHOLD_PERCENT = float(os.getenv("DRAWDOWN_THRESHOLD_PERCENT", 0))
+DRAWDOWN_THRESHOLD = float(os.getenv("DRAWDOWN_THRESHOLD", 2000))
 
 # Instrument Mapping
 # You typically trade options on these indices

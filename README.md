@@ -22,8 +22,8 @@ An automated trading protection system for Zerodha Kite that monitors your P&L i
 
 The kill switch triggers when either condition is met:
 
-1. **Loss Threshold**: Total loss exceeds ₹4,000 (configurable)
-2. **Profit Drawdown**: Profit drops ₹2,000 from peak of ₹5,000 (configurable)
+1. **Loss Threshold**: Total loss exceeds configured percentage or amount (default: 10% or ₹4,000)
+2. **Profit Drawdown**: Profit drops by configured percentage from peak (default: 40% from peak of 12.5% or ₹5,000)
 
 ### When Triggered
 
@@ -94,6 +94,8 @@ python start_bot_with_monitor.py
 | `/monitor` | Start P&L monitoring |
 | `/stopmonitor` | Stop P&L monitoring |
 | `/segments` | Manage trading segments (activate/deactivate) |
+| `/thresholds` | View current kill switch thresholds |
+| `/setthreshold` | Guide to update thresholds |
 | `/help` | Show all available commands |
 
 ## ☁️ AWS Deployment
@@ -152,17 +154,46 @@ KITE_TOTP_KEY=your_totp_secret
 TELEGRAM_BOT_TOKEN=your_bot_token
 TELEGRAM_CHAT_ID=your_chat_id
 
-# Kill Switch Thresholds (in Rupees)
-LOSS_THRESHOLD=4000
-PROFIT_THRESHOLD=5000
-DRAWDOWN_THRESHOLD=2000
+# Trading Capital
+CAPITAL=40000
+
+# Kill Switch Thresholds (Percentage-based - Recommended)
+LOSS_THRESHOLD_PERCENT=10          # 10% of capital
+PROFIT_THRESHOLD_PERCENT=12.5      # 12.5% of capital
+DRAWDOWN_THRESHOLD_PERCENT=40      # 40% drop from peak
+
+# OR use fixed amounts (if percentage not set)
+# LOSS_THRESHOLD=4000
+# PROFIT_THRESHOLD=5000
+# DRAWDOWN_THRESHOLD=2000
 ```
 
 ### Adjusting Thresholds
 
-- **LOSS_THRESHOLD**: Maximum loss before trigger (default: ₹4,000)
-- **PROFIT_THRESHOLD**: Profit level to start tracking drawdown (default: ₹5,000)
-- **DRAWDOWN_THRESHOLD**: Maximum drop from peak profit (default: ₹2,000)
+You can use either **percentage-based** (recommended) or **fixed amount** thresholds:
+
+#### Percentage-Based (Scales with Capital)
+```bash
+# Recommended for flexibility
+CAPITAL=40000
+LOSS_THRESHOLD_PERCENT=10          # 10% of capital = ₹4,000
+PROFIT_THRESHOLD_PERCENT=12.5      # 12.5% of capital = ₹5,000
+DRAWDOWN_THRESHOLD_PERCENT=40      # 40% drop from peak profit
+```
+
+#### Fixed Amount
+```bash
+# Fixed rupee amounts
+LOSS_THRESHOLD=4000                # Trigger at ₹4,000 loss
+PROFIT_THRESHOLD=5000              # Track drawdown from ₹5,000 profit
+DRAWDOWN_THRESHOLD=2000            # Trigger on ₹2,000 drop from peak
+```
+
+**Note:** If percentage is set, it takes priority over fixed amount.
+
+#### View & Update via Telegram
+- `/thresholds` - View current thresholds
+- `/setthreshold` - Get instructions to update thresholds
 
 ## 📁 Project Structure
 

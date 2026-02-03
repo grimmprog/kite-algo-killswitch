@@ -21,10 +21,32 @@ class AdvancedKillSwitch:
         self.capital = config.CAPITAL
         self.kill_switch_file = "killswitch_status.json"
         
-        # Thresholds
-        self.max_loss_threshold = 4000
-        self.profit_threshold = 5000
-        self.profit_drawdown = 2000
+        # Thresholds - Use percentage if set, otherwise use fixed amount
+        # Loss threshold
+        if config.LOSS_THRESHOLD_PERCENT > 0:
+            self.max_loss_threshold = (config.LOSS_THRESHOLD_PERCENT / 100) * self.capital
+            self.loss_display = f"{config.LOSS_THRESHOLD_PERCENT}% (₹{self.max_loss_threshold:,.0f})"
+        else:
+            self.max_loss_threshold = config.LOSS_THRESHOLD
+            self.loss_display = f"₹{self.max_loss_threshold:,.0f}"
+        
+        # Profit threshold
+        if config.PROFIT_THRESHOLD_PERCENT > 0:
+            self.profit_threshold = (config.PROFIT_THRESHOLD_PERCENT / 100) * self.capital
+            self.profit_display = f"{config.PROFIT_THRESHOLD_PERCENT}% (₹{self.profit_threshold:,.0f})"
+        else:
+            self.profit_threshold = config.PROFIT_THRESHOLD
+            self.profit_display = f"₹{self.profit_threshold:,.0f}"
+        
+        # Drawdown threshold (percentage of peak profit)
+        if config.DRAWDOWN_THRESHOLD_PERCENT > 0:
+            self.drawdown_percent = config.DRAWDOWN_THRESHOLD_PERCENT
+            self.drawdown_display = f"{config.DRAWDOWN_THRESHOLD_PERCENT}% of peak"
+        else:
+            self.profit_drawdown = config.DRAWDOWN_THRESHOLD
+            self.drawdown_percent = 0
+            self.drawdown_display = f"₹{self.profit_drawdown:,.0f}"
+        
         self.profit_warning_percent = 10
         
         self.highest_pnl = 0
@@ -188,15 +210,25 @@ class AdvancedKillSwitch:
         if day_pnl > self.highest_pnl:
             self.highest_pnl = day_pnl
         
-        # Rule 1: Loss > ₹4,000
+        # Rule 1: Loss exceeds threshold
         if day_pnl < -self.max_loss_threshold:
-            return True, f"Daily loss exceeded ₹{self.max_loss_threshold:,}"
+            return True, f"Daily loss exceeded {self.loss_display}"
         
-        # Rule 2: Profit > ₹5,000 and dropped by ₹2,000
+        # Rule 2: Profit drawdown from peak
         if self.highest_pnl >= self.profit_threshold:
-            drawdown = self.highest_pnl - day_pnl
-            if drawdown >= self.profit_drawdown:
-                return True, f"Profit drawdown: Peak ₹{self.highest_pnl:,.2f} → Current ₹{day_pnl:,.2f}"
+            # Calculate drawdown
+            if self.drawdown_percent > 0:
+                # Percentage-based drawdown
+                max_allowed_drawdown = (self.drawdown_percent / 100) * self.highest_pnl
+                actual_drawdown = self.highest_pnl - day_pnl
+                
+                if actual_drawdown >= max_allowed_drawdown:
+                    return True, f"Profit drawdown: Peak ₹{self.highest_pnl:,.2f} → Current ₹{day_pnl:,.2f} (dropped {self.drawdown_percent}%)"
+            else:
+                # Fixed amount drawdown
+                drawdown = self.highest_pnl - day_pnl
+                if drawdown >= self.profit_drawdown:
+                    return True, f"Profit drawdown: Peak ₹{self.highest_pnl:,.2f} → Current ₹{day_pnl:,.2f} (dropped ₹{drawdown:,.2f})"
         
         # Rule 3: Profit > 10% warning (not auto-trigger, just warning)
         profit_percent = (day_pnl / self.capital) * 100
@@ -289,9 +321,9 @@ class AdvancedKillSwitch:
         print("ADVANCED KILL SWITCH MONITOR")
         print("=" * 60)
         print(f"Capital: ₹{self.capital:,}")
-        print(f"Max Loss: ₹{self.max_loss_threshold:,}")
-        print(f"Profit Threshold: ₹{self.profit_threshold:,}")
-        print(f"Profit Drawdown: ₹{self.profit_drawdown:,}")
+        print(f"Max Loss: {self.loss_display}")
+        print(f"Profit Threshold: {self.profit_display}")
+        print(f"Profit Drawdown: {self.drawdown_display}")
         print(f"Check Interval: {check_interval}s")
         print("=" * 60)
         
