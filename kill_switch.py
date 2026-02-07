@@ -16,14 +16,34 @@ class KillSwitch:
     def __init__(self):
         self.kite = get_kite_session()
         self.capital = config.CAPITAL
-        self.max_loss_threshold = 4000
-        self.profit_threshold = 5000
-        self.profit_drawdown = 2000
+
+        # Thresholds - Use percentage if set, otherwise use fixed amount
+        if config.LOSS_THRESHOLD_PERCENT > 0:
+            self.max_loss_threshold = (config.LOSS_THRESHOLD_PERCENT / 100) * self.capital
+        else:
+            self.max_loss_threshold = config.LOSS_THRESHOLD
+
+        if config.PROFIT_THRESHOLD_PERCENT > 0:
+            self.profit_threshold = (config.PROFIT_THRESHOLD_PERCENT / 100) * self.capital
+        else:
+            self.profit_threshold = config.PROFIT_THRESHOLD
+
+        if config.DRAWDOWN_THRESHOLD_PERCENT > 0:
+            self.profit_drawdown = (config.DRAWDOWN_THRESHOLD_PERCENT / 100) * self.profit_threshold
+        else:
+            self.profit_drawdown = config.DRAWDOWN_THRESHOLD
+
         self.profit_warning_percent = 10
         
         self.highest_pnl = 0
         self.kill_switch_active = False
         self.warning_sent = False
+
+    def _profit_percent(self, pnl):
+        """Safely calculate P&L % of capital, avoiding division by zero."""
+        if self.capital <= 0:
+            return 0
+        return (pnl / self.capital) * 100
         
     def get_total_pnl(self):
         """Get total P&L for the day from all positions"""
@@ -128,7 +148,7 @@ class KillSwitch:
                 return True
         
         # Rule 3: Profit > 10% of capital - Warning only
-        profit_percent = (day_pnl / self.capital) * 100
+        profit_percent = self._profit_percent(day_pnl)
         if profit_percent >= self.profit_warning_percent and not self.warning_sent:
             message = (
                 f"⚠️ PROFIT WARNING\n\n"
@@ -166,7 +186,7 @@ class KillSwitch:
                 open_positions = len(self.get_open_positions())
                 
                 # Calculate percentages
-                day_pnl_percent = (day_pnl / self.capital) * 100
+                day_pnl_percent = self._profit_percent(day_pnl)
                 
                 # Display status
                 status = "🟢" if day_pnl >= 0 else "🔴"
@@ -232,7 +252,7 @@ def main():
         print("\n" + "=" * 60)
         print("CURRENT STATUS")
         print("=" * 60)
-        print(f"Day P&L: ₹{day_pnl:,.2f} ({(day_pnl/ks.capital)*100:+.2f}%)")
+        print(f"Day P&L: ₹{day_pnl:,.2f} ({ks._profit_percent(day_pnl):+.2f}%)")
         print(f"Net P&L: ₹{net_pnl:,.2f}")
         print(f"Open Positions: {len(positions)}")
         print("=" * 60)
@@ -241,7 +261,7 @@ def main():
         status_emoji = "🟢" if day_pnl >= 0 else "🔴"
         message = (
             f"{status_emoji} **DAILY STATUS UPDATE**\n\n"
-            f"Day P&L: ₹{day_pnl:,.2f} ({(day_pnl/ks.capital)*100:+.2f}%)\n"
+            f"Day P&L: ₹{day_pnl:,.2f} ({ks._profit_percent(day_pnl):+.2f}%)\n"
             f"Net P&L: ₹{net_pnl:,.2f}\n"
             f"Open Positions: {len(positions)}\n"
             f"Capital: ₹{ks.capital:,}\n"
