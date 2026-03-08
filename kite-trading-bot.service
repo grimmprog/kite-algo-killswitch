@@ -1,0 +1,17 @@
+[Unit]
+Description=Kite Trading Bot with Kill Switch Monitoring
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/Kite-trading/kite-algo
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/ubuntu/Kite-trading/kite-algo/.venv/bin"
+ExecStart=/home/ubuntu/Kite-trading/kite-algo/start_trading_bot.sh
+Restart=always
+RestartSec=10
+StandardOutput=append:/home/ubuntu/Kite-trading/kite-algo/logs/bot_service.log
+StandardError=append:/home/ubuntu/Kite-trading/kite-algo/logs/bot_service_error.log
+
+[Install]
+WantedBy=multi-user.target

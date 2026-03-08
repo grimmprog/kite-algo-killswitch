@@ -1,0 +1,585 @@
+2026-02-25 14:40:02,257 - INFO - ============================================================
+2026-02-25 14:40:02,258 - INFO - AUTOMATED KITE LOGIN
+2026-02-25 14:40:02,258 - INFO - ============================================================
+2026-02-25 14:40:02,258 - INFO - Time: 2026-02-25 14:40:02
+2026-02-25 14:40:02,258 - INFO - User: YS2567
+2026-02-25 14:40:02,258 - INFO - ============================================================
+2026-02-25 14:40:02,258 - INFO - ====== WebDriver manager ======
+2026-02-25 14:40:02,873 - INFO - Get LATEST chromedriver version for google-chrome
+2026-02-25 14:40:02,937 - INFO - Get LATEST chromedriver version for google-chrome
+2026-02-25 14:40:03,005 - INFO - Driver [/home/ubuntu/.wdm/drivers/chromedriver/linux64/144.0.7559.133/chromedriver-linux64/chromedriver] found in cache
+2026-02-25 14:40:04,458 - INFO - Chrome WebDriver initialized on Linux
+2026-02-25 14:40:04,460 - INFO - Navigating to Kite login page...
+2026-02-25 14:40:07,046 - INFO - Entering user ID...
+2026-02-25 14:40:07,189 - INFO - Entering password...
+2026-02-25 14:40:07,428 - INFO - Waiting for TOTP page...
+2026-02-25 14:40:10,437 - INFO - Generated TOTP code: 404869
+2026-02-25 14:40:10,437 - INFO - Entering TOTP...
+2026-02-25 14:40:10,450 - INFO - Found TOTP field using: css selector='input[type='number'][id='userid']'
+2026-02-25 14:40:10,534 - INFO - TOTP entered successfully
+2026-02-25 14:40:11,551 - WARNING - Could not press Enter on TOTP field: Message: stale element reference: stale element not found
+  (Session info: chrome=144.0.7559.109); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#staleelementreferenceexception
+Stacktrace:
+#0 0x57617c688a4a <unknown>
+#1 0x57617c0a16a2 <unknown>
+#2 0x57617c0b60bb <unknown>
+#3 0x57617c0b4b51 <unknown>
+#4 0x57617c0a91b9 <unknown>
+#5 0x57617c0a7399 <unknown>
+#6 0x57617c0ab039 <unknown>
+#7 0x57617c0ab0e3 <unknown>
+#8 0x57617c0f7784 <unknown>
+#9 0x57617c0f7818 <unknown>
+#10 0x57617c0edfaf <unknown>
+#11 0x57617c0ea2d7 <unknown>
+#12 0x57617c13f7f0 <unknown>
+#13 0x57617c0e88b2 <unknown>
+#14 0x57617c0e96a1 <unknown>
+#15 0x57617c64e8a9 <unknown>
+#16 0x57617c6517b1 <unknown>
+#17 0x57617c63aea9 <unknown>
+#18 0x57617c65236e <unknown>
+#19 0x57617c621410 <unknown>
+#20 0x57617c6760c8 <unknown>
+#21 0x57617c67629b <unknown>
+#22 0x57617c687db8 <unknown>
+#23 0x70f7ea494ac3 <unknown>
+
+2026-02-25 14:40:11,562 - WARNING - Could not submit form, waiting for auto-submit...
+2026-02-25 14:40:11,563 - INFO - Waiting for redirect...
+2026-02-25 14:40:16,586 - INFO - Redirected to: https://55a18bbd9086.ngrok-free.app/callback?action=login&type=login&status=success&request_token=1DzAWzEyq2AchnezTkZzLCdZOktzOYwm
+2026-02-25 14:40:16,586 - INFO - ✅ Request token obtained: 1DzAWzEyq2...
+2026-02-25 14:40:17,539 - INFO - Generating session...
+2026-02-25 14:40:17,650 - INFO - ✅ Access token generated successfully
+2026-02-25 14:40:17,652 - INFO - ✅ Access token saved to: /home/ubuntu/Kite-trading/kite-algo/access_token.txt
+2026-02-25 14:40:17,652 - INFO - ============================================================
+2026-02-25 14:40:17,652 - INFO - ✅ AUTO-LOGIN SUCCESSFUL!
+2026-02-25 14:40:17,652 - INFO - ============================================================
+2026-02-25 14:40:17,844 - INFO - Telegram notifier initialized
+2026-02-25 14:40:18,484 - INFO - Telegram message sent
+2026-02-25 14:40:18,564 - INFO - Browser closed
+2026-02-25 14:40:18,565 - INFO - Auto-login completed successfully
+2026-02-26 09:44:16,410 - INFO - ============================================================
+2026-02-26 09:44:16,412 - INFO - AUTOMATED KITE LOGIN
+2026-02-26 09:44:16,412 - INFO - ============================================================
+2026-02-26 09:44:16,412 - INFO - Time: 2026-02-26 09:44:16
+2026-02-26 09:44:16,412 - INFO - User: YS2567
+2026-02-26 09:44:16,412 - INFO - ============================================================
+2026-02-26 09:44:16,412 - INFO - ====== WebDriver manager ======
+2026-02-26 09:44:16,775 - INFO - Get LATEST chromedriver version for google-chrome
+2026-02-26 09:44:16,842 - INFO - Get LATEST chromedriver version for google-chrome
+2026-02-26 09:44:16,901 - INFO - Driver [/home/ubuntu/.wdm/drivers/chromedriver/linux64/144.0.7559.133/chromedriver-linux64/chromedriver] found in cache
+2026-02-26 09:44:18,164 - INFO - Chrome WebDriver initialized on Linux
+2026-02-26 09:44:18,166 - INFO - Navigating to Kite login page...
+2026-02-26 09:44:20,689 - INFO - Entering user ID...
+2026-02-26 09:44:20,958 - INFO - Entering password...
+2026-02-26 09:44:21,438 - INFO - Waiting for TOTP page...
+2026-02-26 09:44:24,452 - INFO - Generated TOTP code: 279861
+2026-02-26 09:44:24,452 - INFO - Entering TOTP...
+2026-02-26 09:44:24,466 - INFO - Found TOTP field using: css selector='input[type='number'][id='userid']'
+2026-02-26 09:44:24,575 - INFO - TOTP entered successfully
+2026-02-26 09:44:25,601 - WARNING - Could not press Enter on TOTP field: Message: stale element reference: stale element not found
+  (Session info: chrome=144.0.7559.109); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#staleelementreferenceexception
+Stacktrace:
+#0 0x60c836dbfa4a <unknown>
+#1 0x60c8367d86a2 <unknown>
+#2 0x60c8367ed0bb <unknown>
+#3 0x60c8367ebb51 <unknown>
+#4 0x60c8367e01b9 <unknown>
+#5 0x60c8367de399 <unknown>
+#6 0x60c8367e2039 <unknown>
+#7 0x60c8367e20e3 <unknown>
+#8 0x60c83682e784 <unknown>
+#9 0x60c83682e818 <unknown>
+#10 0x60c836824faf <unknown>
+#11 0x60c8368212d7 <unknown>
+#12 0x60c8368767f0 <unknown>
+#13 0x60c83681f8b2 <unknown>
+#14 0x60c8368206a1 <unknown>
+#15 0x60c836d858a9 <unknown>
+#16 0x60c836d887b1 <unknown>
+#17 0x60c836d71ea9 <unknown>
+#18 0x60c836d8936e <unknown>
+#19 0x60c836d58410 <unknown>
+#20 0x60c836dad0c8 <unknown>
+#21 0x60c836dad29b <unknown>
+#22 0x60c836dbedb8 <unknown>
+#23 0x7ee5e3c94ac3 <unknown>
+
+2026-02-26 09:44:25,614 - WARNING - Could not submit form, waiting for auto-submit...
+2026-02-26 09:44:25,614 - INFO - Waiting for redirect...
+2026-02-26 09:44:30,625 - INFO - Redirected to: https://55a18bbd9086.ngrok-free.app/callback?action=login&type=login&status=success&request_token=nWVKFaInrhldXaIhRgePQ7bvZW64OUjE
+2026-02-26 09:44:30,625 - INFO - ✅ Request token obtained: nWVKFaInrh...
+2026-02-26 09:44:31,213 - INFO - Generating session...
+2026-02-26 09:44:31,328 - INFO - ✅ Access token generated successfully
+2026-02-26 09:44:31,331 - INFO - ✅ Access token saved to: /home/ubuntu/Kite-trading/kite-algo/access_token.txt
+2026-02-26 09:44:31,332 - INFO - ============================================================
+2026-02-26 09:44:31,332 - INFO - ✅ AUTO-LOGIN SUCCESSFUL!
+2026-02-26 09:44:31,332 - INFO - ============================================================
+2026-02-26 09:44:31,566 - INFO - Telegram notifier initialized
+2026-02-26 09:44:32,219 - INFO - Telegram message sent
+2026-02-26 09:44:32,348 - INFO - Browser closed
+2026-02-26 09:44:32,348 - INFO - Auto-login completed successfully
+2026-02-26 14:40:02,202 - INFO - ============================================================
+2026-02-26 14:40:02,203 - INFO - AUTOMATED KITE LOGIN
+2026-02-26 14:40:02,204 - INFO - ============================================================
+2026-02-26 14:40:02,204 - INFO - Time: 2026-02-26 14:40:02
+2026-02-26 14:40:02,205 - INFO - User: YS2567
+2026-02-26 14:40:02,205 - INFO - ============================================================
+2026-02-26 14:40:02,205 - INFO - ====== WebDriver manager ======
+2026-02-26 14:40:02,762 - INFO - Get LATEST chromedriver version for google-chrome
+2026-02-26 14:40:02,828 - INFO - Get LATEST chromedriver version for google-chrome
+2026-02-26 14:40:02,888 - INFO - Driver [/home/ubuntu/.wdm/drivers/chromedriver/linux64/144.0.7559.133/chromedriver-linux64/chromedriver] found in cache
+2026-02-26 14:40:04,352 - INFO - Chrome WebDriver initialized on Linux
+2026-02-26 14:40:04,354 - INFO - Navigating to Kite login page...
+2026-02-26 14:40:06,979 - INFO - Entering user ID...
+2026-02-26 14:40:07,369 - INFO - Entering password...
+2026-02-26 14:40:08,008 - INFO - Waiting for TOTP page...
+2026-02-26 14:40:11,025 - INFO - Generated TOTP code: 541462
+2026-02-26 14:40:11,026 - INFO - Entering TOTP...
+2026-02-26 14:40:11,048 - INFO - Found TOTP field using: css selector='input[type='number'][id='userid']'
+2026-02-26 14:40:11,218 - INFO - TOTP entered successfully
+2026-02-26 14:40:12,244 - WARNING - Could not press Enter on TOTP field: Message: stale element reference: stale element not found
+  (Session info: chrome=144.0.7559.109); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#staleelementreferenceexception
+Stacktrace:
+#0 0x61d571770a4a <unknown>
+#1 0x61d5711896a2 <unknown>
+#2 0x61d57119e0bb <unknown>
+#3 0x61d57119cb51 <unknown>
+#4 0x61d5711911b9 <unknown>
+#5 0x61d57118f399 <unknown>
+#6 0x61d571193039 <unknown>
+#7 0x61d5711930e3 <unknown>
+#8 0x61d5711df784 <unknown>
+#9 0x61d5711df818 <unknown>
+#10 0x61d5711d5faf <unknown>
+#11 0x61d5711d22d7 <unknown>
+#12 0x61d5712277f0 <unknown>
+#13 0x61d5711d08b2 <unknown>
+#14 0x61d5711d16a1 <unknown>
+#15 0x61d5717368a9 <unknown>
+#16 0x61d5717397b1 <unknown>
+#17 0x61d571722ea9 <unknown>
+#18 0x61d57173a36e <unknown>
+#19 0x61d571709410 <unknown>
+#20 0x61d57175e0c8 <unknown>
+#21 0x61d57175e29b <unknown>
+#22 0x61d57176fdb8 <unknown>
+#23 0x71965f694ac3 <unknown>
+
+2026-02-26 14:40:12,260 - WARNING - Could not submit form, waiting for auto-submit...
+2026-02-26 14:40:12,260 - INFO - Waiting for redirect...
+2026-02-26 14:40:17,286 - INFO - Redirected to: https://55a18bbd9086.ngrok-free.app/callback?action=login&type=login&status=success&request_token=nU5wzHtnACBMn9zflS6lmrPu5tTgk34y
+2026-02-26 14:40:17,287 - INFO - ✅ Request token obtained: nU5wzHtnAC...
+2026-02-26 14:40:18,040 - INFO - Generating session...
+2026-02-26 14:40:18,162 - INFO - ✅ Access token generated successfully
+2026-02-26 14:40:18,164 - INFO - ✅ Access token saved to: /home/ubuntu/Kite-trading/kite-algo/access_token.txt
+2026-02-26 14:40:18,165 - INFO - ============================================================
+2026-02-26 14:40:18,165 - INFO - ✅ AUTO-LOGIN SUCCESSFUL!
+2026-02-26 14:40:18,165 - INFO - ============================================================
+2026-02-26 14:40:18,352 - INFO - Telegram notifier initialized
+2026-02-26 14:40:18,995 - INFO - Telegram message sent
+2026-02-26 14:40:19,142 - INFO - Browser closed
+2026-02-26 14:40:19,142 - INFO - Auto-login completed successfully
+2026-02-27 09:10:02,554 - INFO - ============================================================
+2026-02-27 09:10:02,555 - INFO - AUTOMATED KITE LOGIN
+2026-02-27 09:10:02,555 - INFO - ============================================================
+2026-02-27 09:10:02,555 - INFO - Time: 2026-02-27 09:10:02
+2026-02-27 09:10:02,555 - INFO - User: YS2567
+2026-02-27 09:10:02,555 - INFO - ============================================================
+2026-02-27 09:10:02,556 - INFO - ====== WebDriver manager ======
+2026-02-27 09:10:03,078 - INFO - Get LATEST chromedriver version for google-chrome
+2026-02-27 09:10:03,158 - INFO - Get LATEST chromedriver version for google-chrome
+2026-02-27 09:10:03,220 - INFO - Get LATEST chromedriver version for google-chrome
+2026-02-27 09:10:03,417 - INFO - WebDriver version 144.0.7559.133 selected
+2026-02-27 09:10:03,423 - INFO - Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/144.0.7559.133/linux64/chromedriver-linux64.zip
+2026-02-27 09:10:03,424 - INFO - About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/144.0.7559.133/linux64/chromedriver-linux64.zip
+2026-02-27 09:10:03,485 - INFO - Driver downloading response is 200
+2026-02-27 09:10:03,643 - INFO - Get LATEST chromedriver version for google-chrome
+2026-02-27 09:10:03,908 - INFO - Driver has been saved in cache [/home/ubuntu/.wdm/drivers/chromedriver/linux64/144.0.7559.133]
+2026-02-27 09:10:05,062 - INFO - Chrome WebDriver initialized on Linux
+2026-02-27 09:10:05,062 - INFO - Navigating to Kite login page...
+2026-02-27 09:10:07,558 - INFO - Entering user ID...
+2026-02-27 09:10:07,686 - INFO - Entering password...
+2026-02-27 09:10:07,918 - INFO - Waiting for TOTP page...
+2026-02-27 09:10:10,923 - INFO - Generated TOTP code: 763091
+2026-02-27 09:10:10,923 - INFO - Entering TOTP...
+2026-02-27 09:10:10,935 - INFO - Found TOTP field using: css selector='input[type='number'][id='userid']'
+2026-02-27 09:10:11,024 - INFO - TOTP entered successfully
+2026-02-27 09:10:12,035 - WARNING - Could not press Enter on TOTP field: Message: stale element reference: stale element not found
+  (Session info: chrome=144.0.7559.109); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#staleelementreferenceexception
+Stacktrace:
+#0 0x5e20459e1a4a <unknown>
+#1 0x5e20453fa6a2 <unknown>
+#2 0x5e204540f0bb <unknown>
+#3 0x5e204540db51 <unknown>
+#4 0x5e20454021b9 <unknown>
+#5 0x5e2045400399 <unknown>
+#6 0x5e2045404039 <unknown>
+#7 0x5e20454040e3 <unknown>
+#8 0x5e2045450784 <unknown>
+#9 0x5e2045450818 <unknown>
+#10 0x5e2045446faf <unknown>
+#11 0x5e20454432d7 <unknown>
+#12 0x5e20454987f0 <unknown>
+#13 0x5e20454418b2 <unknown>
+#14 0x5e20454426a1 <unknown>
+#15 0x5e20459a78a9 <unknown>
+#16 0x5e20459aa7b1 <unknown>
+#17 0x5e2045993ea9 <unknown>
+#18 0x5e20459ab36e <unknown>
+#19 0x5e204597a410 <unknown>
+#20 0x5e20459cf0c8 <unknown>
+#21 0x5e20459cf29b <unknown>
+#22 0x5e20459e0db8 <unknown>
+#23 0x70ca1d094ac3 <unknown>
+
+2026-02-27 09:10:12,045 - WARNING - Could not submit form, waiting for auto-submit...
+2026-02-27 09:10:12,045 - INFO - Waiting for redirect...
+2026-02-27 09:10:17,056 - INFO - Redirected to: https://55a18bbd9086.ngrok-free.app/callback?action=login&type=login&status=success&request_token=ktkYOob1VPFzCghkWB0UmEa0AorjMbHe
+2026-02-27 09:10:17,056 - INFO - ✅ Request token obtained: ktkYOob1VP...
+2026-02-27 09:10:17,244 - INFO - Generating session...
+2026-02-27 09:10:17,326 - INFO - ✅ Access token generated successfully
+2026-02-27 09:10:17,328 - INFO - ✅ Access token saved to: /home/ubuntu/Kite-trading/kite-algo/access_token.txt
+2026-02-27 09:10:17,328 - INFO - ============================================================
+2026-02-27 09:10:17,328 - INFO - ✅ AUTO-LOGIN SUCCESSFUL!
+2026-02-27 09:10:17,328 - INFO - ============================================================
+2026-02-27 09:10:17,375 - INFO - Telegram notifier initialized
+2026-02-27 09:10:18,003 - INFO - Telegram message sent
+2026-02-27 09:10:18,065 - INFO - Browser closed
+2026-02-27 09:10:18,065 - INFO - Auto-login completed successfully
+2026-03-02 09:10:02,163 - INFO - ============================================================
+2026-03-02 09:10:02,165 - INFO - AUTOMATED KITE LOGIN
+2026-03-02 09:10:02,165 - INFO - ============================================================
+2026-03-02 09:10:02,165 - INFO - Time: 2026-03-02 09:10:02
+2026-03-02 09:10:02,165 - INFO - User: YS2567
+2026-03-02 09:10:02,165 - INFO - ============================================================
+2026-03-02 09:10:02,165 - INFO - ====== WebDriver manager ======
+2026-03-02 09:10:02,536 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-02 09:10:02,654 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-02 09:10:02,759 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-02 09:10:03,065 - INFO - WebDriver version 144.0.7559.133 selected
+2026-03-02 09:10:03,075 - INFO - Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/144.0.7559.133/linux64/chromedriver-linux64.zip
+2026-03-02 09:10:03,076 - INFO - About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/144.0.7559.133/linux64/chromedriver-linux64.zip
+2026-03-02 09:10:03,156 - INFO - Driver downloading response is 200
+2026-03-02 09:10:03,268 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-02 09:10:03,545 - INFO - Driver has been saved in cache [/home/ubuntu/.wdm/drivers/chromedriver/linux64/144.0.7559.133]
+2026-03-02 09:10:04,564 - INFO - Chrome WebDriver initialized on Linux
+2026-03-02 09:10:04,564 - INFO - Navigating to Kite login page...
+2026-03-02 09:10:07,094 - INFO - Entering user ID...
+2026-03-02 09:10:07,219 - INFO - Entering password...
+2026-03-02 09:10:07,469 - INFO - Waiting for TOTP page...
+2026-03-02 09:10:10,472 - INFO - Generated TOTP code: 179506
+2026-03-02 09:10:10,472 - INFO - Entering TOTP...
+2026-03-02 09:10:10,499 - INFO - Found TOTP field using: css selector='input[type='number'][id='userid']'
+2026-03-02 09:10:10,626 - INFO - TOTP entered successfully
+2026-03-02 09:10:11,636 - WARNING - Could not press Enter on TOTP field: Message: stale element reference: stale element not found
+  (Session info: chrome=144.0.7559.109); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#staleelementreferenceexception
+Stacktrace:
+#0 0x59105691ba4a <unknown>
+#1 0x5910563346a2 <unknown>
+#2 0x5910563490bb <unknown>
+#3 0x591056347b51 <unknown>
+#4 0x59105633c1b9 <unknown>
+#5 0x59105633a399 <unknown>
+#6 0x59105633e039 <unknown>
+#7 0x59105633e0e3 <unknown>
+#8 0x59105638a784 <unknown>
+#9 0x59105638a818 <unknown>
+#10 0x591056380faf <unknown>
+#11 0x59105637d2d7 <unknown>
+#12 0x5910563d27f0 <unknown>
+#13 0x59105637b8b2 <unknown>
+#14 0x59105637c6a1 <unknown>
+#15 0x5910568e18a9 <unknown>
+#16 0x5910568e47b1 <unknown>
+#17 0x5910568cdea9 <unknown>
+#18 0x5910568e536e <unknown>
+#19 0x5910568b4410 <unknown>
+#20 0x5910569090c8 <unknown>
+#21 0x59105690929b <unknown>
+#22 0x59105691adb8 <unknown>
+#23 0x746af3e94ac3 <unknown>
+
+2026-03-02 09:10:11,647 - WARNING - Could not submit form, waiting for auto-submit...
+2026-03-02 09:10:11,647 - INFO - Waiting for redirect...
+2026-03-02 09:10:16,658 - INFO - Redirected to: https://55a18bbd9086.ngrok-free.app/callback?request_token=6VbSRCwxqnYhQry42JkMp91dO9JnDQ4U&action=login&type=login&status=success
+2026-03-02 09:10:16,658 - INFO - ✅ Request token obtained: 6VbSRCwxqn...
+2026-03-02 09:10:17,174 - INFO - Generating session...
+2026-03-02 09:10:17,253 - INFO - ✅ Access token generated successfully
+2026-03-02 09:10:17,258 - INFO - ✅ Access token saved to: /home/ubuntu/Kite-trading/kite-algo/access_token.txt
+2026-03-02 09:10:17,258 - INFO - ============================================================
+2026-03-02 09:10:17,258 - INFO - ✅ AUTO-LOGIN SUCCESSFUL!
+2026-03-02 09:10:17,258 - INFO - ============================================================
+2026-03-02 09:10:17,432 - INFO - Telegram notifier initialized
+2026-03-02 09:10:18,233 - INFO - Telegram message sent
+2026-03-02 09:10:18,300 - INFO - Browser closed
+2026-03-02 09:10:18,300 - INFO - Auto-login completed successfully
+2026-03-03 09:10:02,094 - INFO - ============================================================
+2026-03-03 09:10:02,097 - INFO - AUTOMATED KITE LOGIN
+2026-03-03 09:10:02,097 - INFO - ============================================================
+2026-03-03 09:10:02,097 - INFO - Time: 2026-03-03 09:10:02
+2026-03-03 09:10:02,097 - INFO - User: YS2567
+2026-03-03 09:10:02,097 - INFO - ============================================================
+2026-03-03 09:10:02,097 - INFO - ====== WebDriver manager ======
+2026-03-03 09:10:02,650 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-03 09:10:02,746 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-03 09:10:02,840 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-03 09:10:03,130 - INFO - WebDriver version 144.0.7559.133 selected
+2026-03-03 09:10:03,138 - INFO - Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/144.0.7559.133/linux64/chromedriver-linux64.zip
+2026-03-03 09:10:03,139 - INFO - About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/144.0.7559.133/linux64/chromedriver-linux64.zip
+2026-03-03 09:10:03,224 - INFO - Driver downloading response is 200
+2026-03-03 09:10:03,398 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-03 09:10:03,700 - INFO - Driver has been saved in cache [/home/ubuntu/.wdm/drivers/chromedriver/linux64/144.0.7559.133]
+2026-03-03 09:10:04,819 - INFO - Chrome WebDriver initialized on Linux
+2026-03-03 09:10:04,819 - INFO - Navigating to Kite login page...
+2026-03-03 09:10:07,224 - INFO - Entering user ID...
+2026-03-03 09:10:07,358 - INFO - Entering password...
+2026-03-03 09:10:07,597 - INFO - Waiting for TOTP page...
+2026-03-03 09:10:10,601 - INFO - Generated TOTP code: 298542
+2026-03-03 09:10:10,601 - INFO - Entering TOTP...
+2026-03-03 09:10:10,614 - INFO - Found TOTP field using: css selector='input[type='number'][id='userid']'
+2026-03-03 09:10:10,709 - INFO - TOTP entered successfully
+2026-03-03 09:10:11,721 - WARNING - Could not press Enter on TOTP field: Message: stale element reference: stale element not found
+  (Session info: chrome=144.0.7559.109); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#staleelementreferenceexception
+Stacktrace:
+#0 0x57782ba4ca4a <unknown>
+#1 0x57782b4656a2 <unknown>
+#2 0x57782b47a0bb <unknown>
+#3 0x57782b478b51 <unknown>
+#4 0x57782b46d1b9 <unknown>
+#5 0x57782b46b399 <unknown>
+#6 0x57782b46f039 <unknown>
+#7 0x57782b46f0e3 <unknown>
+#8 0x57782b4bb784 <unknown>
+#9 0x57782b4bb818 <unknown>
+#10 0x57782b4b1faf <unknown>
+#11 0x57782b4ae2d7 <unknown>
+#12 0x57782b5037f0 <unknown>
+#13 0x57782b4ac8b2 <unknown>
+#14 0x57782b4ad6a1 <unknown>
+#15 0x57782ba128a9 <unknown>
+#16 0x57782ba157b1 <unknown>
+#17 0x57782b9feea9 <unknown>
+#18 0x57782ba1636e <unknown>
+#19 0x57782b9e5410 <unknown>
+#20 0x57782ba3a0c8 <unknown>
+#21 0x57782ba3a29b <unknown>
+#22 0x57782ba4bdb8 <unknown>
+#23 0x7c78b3e94ac3 <unknown>
+
+2026-03-03 09:10:11,732 - WARNING - Could not submit form, waiting for auto-submit...
+2026-03-03 09:10:11,732 - INFO - Waiting for redirect...
+2026-03-03 09:10:16,743 - INFO - Redirected to: https://55a18bbd9086.ngrok-free.app/callback?action=login&type=login&status=success&request_token=Cjx4FN72yt0ICI72Oz5Ks338UcLdc9De
+2026-03-03 09:10:16,743 - INFO - ✅ Request token obtained: Cjx4FN72yt...
+2026-03-03 09:10:17,182 - INFO - Generating session...
+2026-03-03 09:10:17,273 - INFO - ✅ Access token generated successfully
+2026-03-03 09:10:17,276 - INFO - ✅ Access token saved to: /home/ubuntu/Kite-trading/kite-algo/access_token.txt
+2026-03-03 09:10:17,276 - INFO - ============================================================
+2026-03-03 09:10:17,276 - INFO - ✅ AUTO-LOGIN SUCCESSFUL!
+2026-03-03 09:10:17,276 - INFO - ============================================================
+2026-03-03 09:10:17,445 - INFO - Telegram notifier initialized
+2026-03-03 09:10:18,056 - INFO - Telegram message sent
+2026-03-03 09:10:18,121 - INFO - Browser closed
+2026-03-03 09:10:18,121 - INFO - Auto-login completed successfully
+2026-03-04 09:10:02,900 - INFO - ============================================================
+2026-03-04 09:10:02,908 - INFO - AUTOMATED KITE LOGIN
+2026-03-04 09:10:02,908 - INFO - ============================================================
+2026-03-04 09:10:02,908 - INFO - Time: 2026-03-04 09:10:02
+2026-03-04 09:10:02,908 - INFO - User: YS2567
+2026-03-04 09:10:02,908 - INFO - ============================================================
+2026-03-04 09:10:02,909 - INFO - ====== WebDriver manager ======
+2026-03-04 09:10:03,458 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-04 09:10:03,561 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-04 09:10:03,625 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-04 09:10:03,834 - INFO - WebDriver version 144.0.7559.133 selected
+2026-03-04 09:10:03,840 - INFO - Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/144.0.7559.133/linux64/chromedriver-linux64.zip
+2026-03-04 09:10:03,841 - INFO - About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/144.0.7559.133/linux64/chromedriver-linux64.zip
+2026-03-04 09:10:03,902 - INFO - Driver downloading response is 200
+2026-03-04 09:10:04,053 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-04 09:10:04,347 - INFO - Driver has been saved in cache [/home/ubuntu/.wdm/drivers/chromedriver/linux64/144.0.7559.133]
+2026-03-04 09:10:05,411 - INFO - Chrome WebDriver initialized on Linux
+2026-03-04 09:10:05,412 - INFO - Navigating to Kite login page...
+2026-03-04 09:10:07,951 - INFO - Entering user ID...
+2026-03-04 09:10:08,081 - INFO - Entering password...
+2026-03-04 09:10:08,311 - INFO - Waiting for TOTP page...
+2026-03-04 09:10:11,315 - INFO - Generated TOTP code: 667018
+2026-03-04 09:10:11,315 - INFO - Entering TOTP...
+2026-03-04 09:10:11,327 - INFO - Found TOTP field using: css selector='input[type='number'][id='userid']'
+2026-03-04 09:10:11,420 - INFO - TOTP entered successfully
+2026-03-04 09:10:12,430 - WARNING - Could not press Enter on TOTP field: Message: stale element reference: stale element not found
+  (Session info: chrome=144.0.7559.109); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#staleelementreferenceexception
+Stacktrace:
+#0 0x56b58d83fa4a <unknown>
+#1 0x56b58d2586a2 <unknown>
+#2 0x56b58d26d0bb <unknown>
+#3 0x56b58d26bb51 <unknown>
+#4 0x56b58d2601b9 <unknown>
+#5 0x56b58d25e399 <unknown>
+#6 0x56b58d262039 <unknown>
+#7 0x56b58d2620e3 <unknown>
+#8 0x56b58d2ae784 <unknown>
+#9 0x56b58d2ae818 <unknown>
+#10 0x56b58d2a4faf <unknown>
+#11 0x56b58d2a12d7 <unknown>
+#12 0x56b58d2f67f0 <unknown>
+#13 0x56b58d29f8b2 <unknown>
+#14 0x56b58d2a06a1 <unknown>
+#15 0x56b58d8058a9 <unknown>
+#16 0x56b58d8087b1 <unknown>
+#17 0x56b58d7f1ea9 <unknown>
+#18 0x56b58d80936e <unknown>
+#19 0x56b58d7d8410 <unknown>
+#20 0x56b58d82d0c8 <unknown>
+#21 0x56b58d82d29b <unknown>
+#22 0x56b58d83edb8 <unknown>
+#23 0x766ec8e94ac3 <unknown>
+
+2026-03-04 09:10:12,440 - WARNING - Could not submit form, waiting for auto-submit...
+2026-03-04 09:10:12,440 - INFO - Waiting for redirect...
+2026-03-04 09:10:17,450 - INFO - Redirected to: https://55a18bbd9086.ngrok-free.app/callback?action=login&type=login&status=success&request_token=E5JuWzVV6wxS8Hm93FFinFzDJik9pL05
+2026-03-04 09:10:17,450 - INFO - ✅ Request token obtained: E5JuWzVV6w...
+2026-03-04 09:10:17,850 - INFO - Generating session...
+2026-03-04 09:10:17,933 - INFO - ✅ Access token generated successfully
+2026-03-04 09:10:17,935 - INFO - ✅ Access token saved to: /home/ubuntu/Kite-trading/kite-algo/access_token.txt
+2026-03-04 09:10:17,936 - INFO - ============================================================
+2026-03-04 09:10:17,936 - INFO - ✅ AUTO-LOGIN SUCCESSFUL!
+2026-03-04 09:10:17,936 - INFO - ============================================================
+2026-03-04 09:10:18,113 - INFO - Telegram notifier initialized
+2026-03-04 09:10:18,785 - INFO - Telegram message sent
+2026-03-04 09:10:18,849 - INFO - Browser closed
+2026-03-04 09:10:18,849 - INFO - Auto-login completed successfully
+2026-03-05 09:10:02,526 - INFO - ============================================================
+2026-03-05 09:10:02,528 - INFO - AUTOMATED KITE LOGIN
+2026-03-05 09:10:02,528 - INFO - ============================================================
+2026-03-05 09:10:02,528 - INFO - Time: 2026-03-05 09:10:02
+2026-03-05 09:10:02,528 - INFO - User: YS2567
+2026-03-05 09:10:02,528 - INFO - ============================================================
+2026-03-05 09:10:02,528 - INFO - ====== WebDriver manager ======
+2026-03-05 09:10:02,822 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-05 09:10:02,932 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-05 09:10:03,039 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-05 09:10:03,307 - INFO - WebDriver version 144.0.7559.133 selected
+2026-03-05 09:10:03,314 - INFO - Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/144.0.7559.133/linux64/chromedriver-linux64.zip
+2026-03-05 09:10:03,314 - INFO - About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/144.0.7559.133/linux64/chromedriver-linux64.zip
+2026-03-05 09:10:03,382 - INFO - Driver downloading response is 200
+2026-03-05 09:10:03,557 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-05 09:10:03,812 - INFO - Driver has been saved in cache [/home/ubuntu/.wdm/drivers/chromedriver/linux64/144.0.7559.133]
+2026-03-05 09:10:04,252 - INFO - Chrome WebDriver initialized on Linux
+2026-03-05 09:10:04,252 - INFO - Navigating to Kite login page...
+2026-03-05 09:10:06,685 - INFO - Entering user ID...
+2026-03-05 09:10:06,794 - INFO - Entering password...
+2026-03-05 09:10:07,020 - INFO - Waiting for TOTP page...
+2026-03-05 09:10:10,023 - INFO - Generated TOTP code: 706876
+2026-03-05 09:10:10,024 - INFO - Entering TOTP...
+2026-03-05 09:10:10,036 - INFO - Found TOTP field using: css selector='input[type='number'][id='userid']'
+2026-03-05 09:10:10,126 - INFO - TOTP entered successfully
+2026-03-05 09:10:11,136 - WARNING - Could not press Enter on TOTP field: Message: stale element reference: stale element not found
+  (Session info: chrome=144.0.7559.109); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#staleelementreferenceexception
+Stacktrace:
+#0 0x56f7b6f6fa4a <unknown>
+#1 0x56f7b69886a2 <unknown>
+#2 0x56f7b699d0bb <unknown>
+#3 0x56f7b699bb51 <unknown>
+#4 0x56f7b69901b9 <unknown>
+#5 0x56f7b698e399 <unknown>
+#6 0x56f7b6992039 <unknown>
+#7 0x56f7b69920e3 <unknown>
+#8 0x56f7b69de784 <unknown>
+#9 0x56f7b69de818 <unknown>
+#10 0x56f7b69d4faf <unknown>
+#11 0x56f7b69d12d7 <unknown>
+#12 0x56f7b6a267f0 <unknown>
+#13 0x56f7b69cf8b2 <unknown>
+#14 0x56f7b69d06a1 <unknown>
+#15 0x56f7b6f358a9 <unknown>
+#16 0x56f7b6f387b1 <unknown>
+#17 0x56f7b6f21ea9 <unknown>
+#18 0x56f7b6f3936e <unknown>
+#19 0x56f7b6f08410 <unknown>
+#20 0x56f7b6f5d0c8 <unknown>
+#21 0x56f7b6f5d29b <unknown>
+#22 0x56f7b6f6edb8 <unknown>
+#23 0x725ce4894ac3 <unknown>
+
+2026-03-05 09:10:11,146 - WARNING - Could not submit form, waiting for auto-submit...
+2026-03-05 09:10:11,146 - INFO - Waiting for redirect...
+2026-03-05 09:10:16,156 - INFO - Redirected to: https://55a18bbd9086.ngrok-free.app/callback?action=login&type=login&status=success&request_token=2t0zO13HQNEv2qF0zr2JhCOPL09W2AfW
+2026-03-05 09:10:16,156 - INFO - ✅ Request token obtained: 2t0zO13HQN...
+2026-03-05 09:10:16,623 - INFO - Generating session...
+2026-03-05 09:10:16,733 - INFO - ✅ Access token generated successfully
+2026-03-05 09:10:16,740 - INFO - ✅ Access token saved to: /home/ubuntu/Kite-trading/kite-algo/access_token.txt
+2026-03-05 09:10:16,741 - INFO - ============================================================
+2026-03-05 09:10:16,741 - INFO - ✅ AUTO-LOGIN SUCCESSFUL!
+2026-03-05 09:10:16,743 - INFO - ============================================================
+2026-03-05 09:10:16,933 - INFO - Telegram notifier initialized
+2026-03-05 09:10:17,571 - INFO - Telegram message sent
+2026-03-05 09:10:17,644 - INFO - Browser closed
+2026-03-05 09:10:17,644 - INFO - Auto-login completed successfully
+2026-03-06 09:10:01,604 - INFO - ============================================================
+2026-03-06 09:10:01,605 - INFO - AUTOMATED KITE LOGIN
+2026-03-06 09:10:01,605 - INFO - ============================================================
+2026-03-06 09:10:01,605 - INFO - Time: 2026-03-06 09:10:01
+2026-03-06 09:10:01,605 - INFO - User: YS2567
+2026-03-06 09:10:01,605 - INFO - ============================================================
+2026-03-06 09:10:01,605 - INFO - ====== WebDriver manager ======
+2026-03-06 09:10:02,134 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-06 09:10:02,256 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-06 09:10:02,359 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-06 09:10:02,670 - INFO - WebDriver version 144.0.7559.133 selected
+2026-03-06 09:10:02,698 - INFO - Modern chrome version https://storage.googleapis.com/chrome-for-testing-public/144.0.7559.133/linux64/chromedriver-linux64.zip
+2026-03-06 09:10:02,699 - INFO - About to download new driver from https://storage.googleapis.com/chrome-for-testing-public/144.0.7559.133/linux64/chromedriver-linux64.zip
+2026-03-06 09:10:02,791 - INFO - Driver downloading response is 200
+2026-03-06 09:10:02,891 - INFO - Get LATEST chromedriver version for google-chrome
+2026-03-06 09:10:03,232 - INFO - Driver has been saved in cache [/home/ubuntu/.wdm/drivers/chromedriver/linux64/144.0.7559.133]
+2026-03-06 09:10:04,077 - INFO - Chrome WebDriver initialized on Linux
+2026-03-06 09:10:04,077 - INFO - Navigating to Kite login page...
+2026-03-06 09:10:06,512 - INFO - Entering user ID...
+2026-03-06 09:10:06,624 - INFO - Entering password...
+2026-03-06 09:10:06,852 - INFO - Waiting for TOTP page...
+2026-03-06 09:10:09,856 - INFO - Generated TOTP code: 215609
+2026-03-06 09:10:09,857 - INFO - Entering TOTP...
+2026-03-06 09:10:09,869 - INFO - Found TOTP field using: css selector='input[type='number'][id='userid']'
+2026-03-06 09:10:09,961 - INFO - TOTP entered successfully
+2026-03-06 09:10:10,979 - WARNING - Could not press Enter on TOTP field: Message: stale element reference: stale element not found
+  (Session info: chrome=144.0.7559.109); For documentation on this error, please visit: https://www.selenium.dev/documentation/webdriver/troubleshooting/errors#staleelementreferenceexception
+Stacktrace:
+#0 0x5742ace7aa4a <unknown>
+#1 0x5742ac8936a2 <unknown>
+#2 0x5742ac8a80bb <unknown>
+#3 0x5742ac8a6b51 <unknown>
+#4 0x5742ac89b1b9 <unknown>
+#5 0x5742ac899399 <unknown>
+#6 0x5742ac89d039 <unknown>
+#7 0x5742ac89d0e3 <unknown>
+#8 0x5742ac8e9784 <unknown>
+#9 0x5742ac8e9818 <unknown>
+#10 0x5742ac8dffaf <unknown>
+#11 0x5742ac8dc2d7 <unknown>
+#12 0x5742ac9317f0 <unknown>
+#13 0x5742ac8da8b2 <unknown>
+#14 0x5742ac8db6a1 <unknown>
+#15 0x5742ace408a9 <unknown>
+#16 0x5742ace437b1 <unknown>
+#17 0x5742ace2cea9 <unknown>
+#18 0x5742ace4436e <unknown>
+#19 0x5742ace13410 <unknown>
+#20 0x5742ace680c8 <unknown>
+#21 0x5742ace6829b <unknown>
+#22 0x5742ace79db8 <unknown>
+#23 0x7606df694ac3 <unknown>
+
+2026-03-06 09:10:10,995 - WARNING - Could not submit form, waiting for auto-submit...
+2026-03-06 09:10:10,995 - INFO - Waiting for redirect...
+2026-03-06 09:10:16,006 - INFO - Redirected to: https://55a18bbd9086.ngrok-free.app/callback?action=login&type=login&status=success&request_token=qCVijfMOwF7dk7WBYP04fD77gKmjiu02
+2026-03-06 09:10:16,006 - INFO - ✅ Request token obtained: qCVijfMOwF...
+2026-03-06 09:10:16,238 - INFO - Generating session...
+2026-03-06 09:10:16,316 - INFO - ✅ Access token generated successfully
+2026-03-06 09:10:16,319 - INFO - ✅ Access token saved to: /home/ubuntu/Kite-trading/kite-algo/access_token.txt
+2026-03-06 09:10:16,319 - INFO - ============================================================
+2026-03-06 09:10:16,319 - INFO - ✅ AUTO-LOGIN SUCCESSFUL!
+2026-03-06 09:10:16,319 - INFO - ============================================================
+2026-03-06 09:10:16,394 - INFO - Telegram notifier initialized
+2026-03-06 09:10:17,022 - INFO - Telegram message sent
+2026-03-06 09:10:17,088 - INFO - Browser closed
+2026-03-06 09:10:17,088 - INFO - Auto-login completed successfully

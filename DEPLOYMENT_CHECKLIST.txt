@@ -1,0 +1,223 @@
+═══════════════════════════════════════════════════════════════
+AWS DEPLOYMENT CHECKLIST
+═══════════════════════════════════════════════════════════════
+
+PRE-DEPLOYMENT (Local Machine)
+═══════════════════════════════════════════════════════════════
+
+□ AWS EC2 instance created (Ubuntu 22.04/20.04)
+□ Instance type: t2.small or larger
+□ Security group allows SSH (port 22)
+□ SSH key pair downloaded (.pem file)
+□ Instance public IP noted: ___________________________
+
+□ .env file created with:
+  □ KITE_USER_ID
+  □ KITE_PASSWORD
+  □ KITE_TOTP_KEY
+  □ TELEGRAM_BOT_TOKEN
+  □ TELEGRAM_CHAT_ID
+  □ LOSS_THRESHOLD (default: 4000)
+  □ PROFIT_THRESHOLD (default: 5000)
+  □ DRAWDOWN_THRESHOLD (default: 2000)
+
+□ Pre-flight check passed: ./pre_deploy_check.sh
+
+□ Files uploaded to AWS:
+  scp -i your-key.pem -r kite-algo ubuntu@your-ec2-ip:~/
+
+
+DEPLOYMENT (AWS Instance)
+═══════════════════════════════════════════════════════════════
+
+□ Connected to AWS: ssh -i your-key.pem ubuntu@your-ec2-ip
+
+□ Navigated to folder: cd ~/kite-algo
+
+□ Deployment script executed: ./aws_deploy.sh
+
+□ Deployment completed without errors
+
+□ Service started: sudo systemctl start kite-trading-bot
+
+□ Auto-start enabled: sudo systemctl enable kite-trading-bot
+
+
+VERIFICATION
+═══════════════════════════════════════════════════════════════
+
+□ Service status checked: sudo systemctl status kite-trading-bot
+  Status: active (running) ✓
+
+□ Monitoring status checked: ./check_monitor_status.sh
+  Monitoring: ACTIVE ✓
+
+□ Logs verified: tail -f logs/bot_monitor.log
+  Shows: "Monitoring started successfully" ✓
+
+□ Telegram bot tested: /status
+  Response received ✓
+  Monitoring shows: 🟢 ON ✓
+
+□ Auto-login scheduled: crontab -l
+  Shows: 45 8 * * 1-5 ... auto_login.py ✓
+
+□ No errors in logs: grep -i error logs/*.log
+  No critical errors ✓
+
+
+FUNCTIONALITY TESTS
+═══════════════════════════════════════════════════════════════
+
+□ Telegram commands tested:
+  □ /start - Welcome message received
+  □ /status - Status displayed correctly
+  □ /monitor - Monitoring started
+  □ /stopmonitor - Monitoring stopped
+  □ /segments - Segment menu displayed
+  □ /help - Help message received
+
+□ Service restart tested:
+  sudo systemctl restart kite-trading-bot
+  Service restarted successfully ✓
+
+□ Logs rotating properly:
+  ls -lh logs/
+  Files have recent timestamps ✓
+
+
+SECURITY CHECKS
+═══════════════════════════════════════════════════════════════
+
+□ .env file permissions: chmod 600 .env
+  Verified: ls -la .env shows -rw------- ✓
+
+□ SSH key secured locally:
+  chmod 400 your-key.pem ✓
+
+□ AWS security group configured:
+  SSH only from your IP ✓
+
+□ No credentials in logs:
+  grep -i password logs/*.log (should be empty) ✓
+
+
+MONITORING SETUP
+═══════════════════════════════════════════════════════════════
+
+□ Kill switch thresholds configured:
+  Loss threshold: ₹_________ (default: 4000)
+  Profit threshold: ₹_________ (default: 5000)
+  Drawdown threshold: ₹_________ (default: 2000)
+
+□ Monitoring frequency: 5 seconds ✓
+
+□ Warning cooldown: 5 minutes ✓
+
+□ Auto-deactivation enabled: F&O segment ✓
+
+
+BACKUP & RECOVERY
+═══════════════════════════════════════════════════════════════
+
+□ Backup created:
+  tar -czf kite-backup-$(date +%Y%m%d).tar.gz kite-algo/.env kite-algo/logs
+
+□ Backup downloaded to local:
+  scp -i your-key.pem ubuntu@your-ec2-ip:~/kite-backup-*.tar.gz .
+
+□ Recovery procedure documented ✓
+
+
+DOCUMENTATION REVIEWED
+═══════════════════════════════════════════════════════════════
+
+□ START_HERE_AWS.md - Read and understood
+□ DEPLOYMENT_SUMMARY.md - Reviewed
+□ AWS_DEPLOYMENT_COMPLETE.md - Available for reference
+□ AWS_QUICK_REFERENCE.md - Bookmarked
+□ DEPLOYMENT_ARCHITECTURE.md - Understood system flow
+
+
+DAILY OPERATIONS PREPARED
+═══════════════════════════════════════════════════════════════
+
+□ Morning routine established:
+  - Check /status on Telegram
+  - Verify monitoring is ON
+  - Confirm auto-login succeeded
+
+□ Monitoring routine:
+  - Telegram notifications enabled
+  - Phone accessible during trading hours
+
+□ Evening routine:
+  - Review logs: tail -n 100 logs/bot_monitor.log
+  - Check for errors
+  - Verify positions closed
+
+
+EMERGENCY PROCEDURES KNOWN
+═══════════════════════════════════════════════════════════════
+
+□ Stop service: sudo systemctl stop kite-trading-bot
+
+□ Deactivate segments: python deactivate_all_segments.py
+
+□ Check positions: /status on Telegram
+
+□ View logs: tail -f logs/bot_monitor.log
+
+□ Restart service: sudo systemctl restart kite-trading-bot
+
+
+CONTACT INFORMATION
+═══════════════════════════════════════════════════════════════
+
+AWS Instance IP: _________________________________________
+
+SSH Key Location: _________________________________________
+
+Telegram Bot Username: @___________________________________
+
+Telegram Chat ID: _________________________________________
+
+Zerodha User ID: _________________________________________
+
+
+NOTES
+═══════════════════════════════════════════════════════════════
+
+Deployment Date: _________________________________________
+
+Deployed By: _________________________________________
+
+Initial Test Results: _________________________________________
+
+_____________________________________________________________
+
+_____________________________________________________________
+
+_____________________________________________________________
+
+
+SIGN-OFF
+═══════════════════════════════════════════════════════════════
+
+□ All checks completed successfully
+
+□ System is operational
+
+□ Monitoring is active
+
+□ Ready for production use
+
+
+Deployed By: ________________________  Date: _______________
+
+Verified By: ________________________  Date: _______________
+
+
+═══════════════════════════════════════════════════════════════
+DEPLOYMENT COMPLETE - SYSTEM OPERATIONAL
+═══════════════════════════════════════════════════════════════

@@ -1,0 +1,4 @@
+# file: /home/ubuntu/Kite-trading/kite-algo/advanced_killswitch.py
+# hypothesis_version: 6.151.9
+
+[100, 300, '\nOptions:', '1', '2', '2. Check status', '3', '4', '=', 'All systems normal', 'BFO', 'BSE', 'BUY', 'Invalid option.', 'KILL SWITCH STATUS', 'Login failed', 'Manual activation', 'Manual reactivation', 'Monitoring stopped', 'NFO', 'NSE', 'Position Analysis:', 'SELL', '__main__', 'active', 'bfo', 'bse_equity', 'count', 'day', 'equity', 'exchange', 'has_positions', 'login', 'monitoring', 'net', 'nfo', 'pnl', 'product', 'quantity', 'r', 'reason', 'segment', 'timestamp', 'tradingsymbol', 'w', 'y', 'yes', '🔴', '🟢']

@@ -1,0 +1,4 @@
+# file: /home/ubuntu/Kite-trading/kite-algo/config.py
+# hypothesis_version: 6.151.9
+
+[100, 2000, 3000, 4000, 5000, 40000, 'BANKNIFTY', 'CAPITAL', 'DRAWDOWN_THRESHOLD', 'KITE_API_KEY', 'KITE_API_SECRET', 'KITE_PASSWORD', 'KITE_REDIRECT_URL', 'KITE_TOTP_KEY', 'KITE_USER_ID', 'LOSS_THRESHOLD', 'NIFTY', 'NIFTY 50', 'NIFTY BANK', 'PROFIT_THRESHOLD', 'SENSEX', 'SENSEX ', 'TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID', 'access_token.txt', 'logs', 'lot_size', 'strike_step', 'symbol']

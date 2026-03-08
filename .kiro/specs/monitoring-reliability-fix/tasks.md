@@ -1,0 +1,119 @@
+# Implementation Plan
+
+- [ ] 1. Write bug condition exploration test
+  - **Property 1: Fault Condition** - Multiple Instance Creation and Monitoring Thread Death
+  - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bug exists
+  - **DO NOT attempt to fix the test or the code when it fails**
+  - **NOTE**: This test encodes the expected behavior - it will validate the fix when it passes after implementation
+  - **GOAL**: Surface counterexamples that demonstrate the bug exists
+  - **Scoped PBT Approach**: Scope the property to concrete failing cases: service restart scenarios and telegram command sequences that create multiple instances
+  - Test that telegram bot commands (/status, /monitor, /stopmonitor, /killswitch) use the same global AdvancedKillSwitch instance
+  - Test that service restarts cause daemon monitoring thread to die and not restart automatically
+  - Test that import fallback pattern in telegram_bot.py creates orphaned instances
+  - Test that multiple AdvancedKillSwitch instances can exist simultaneously with different states
+  - The test assertions should match the Expected Behavior Properties from design:
+    - Property 1: Single Global Instance Usage - all commands use same instance
+    - Monitoring thread persists across service operations
+  - Run test on UNFIXED code
+  - **EXPECTED OUTCOME**: Test FAILS (this is correct - it proves the bug exists)
+  - Document counterexamples found:
+    - Multiple instances created with different monitoring states
+    - Monitoring stops after service restart
+    - Import failures causing fallback to new instances
+  - Mark task complete when test is written, run, and failure is documented
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6_
+
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
+  - **Property 2: Preservation** - Existing Kill Switch Functionality
+  - **IMPORTANT**: Follow observation-first methodology
+  - Observe behavior on UNFIXED code for non-buggy inputs (operations that don't involve instance creation or monitoring thread management)
+  - Write property-based tests capturing observed behavior patterns from Preservation Requirements:
+    - Threshold checking (loss, profit, drawdown) works correctly
+    - Position closing logic executes properly
+    - Segment deactivation automation functions correctly
+    - Monitoring status persistence to disk works as expected
+    - Telegram bot command responses and notifications are correct
+    - Manual kill switch activation/deactivation works properly
+  - Property-based testing generates many test cases for stronger guarantees
+  - Run tests on UNFIXED code
+  - **EXPECTED OUTCOME**: Tests PASS (this confirms baseline behavior to preserve)
+  - Mark task complete when tests are written, run, and passing on unfixed code
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
+
+- [x] 3. Fix for monitoring reliability - ensure single global instance and persistent monitoring
+
+  - [x] 3.1 Implement global instance access in start_bot_with_monitor.py
+    - Export the kill_switch variable as a module-level accessible instance
+    - Add get_global_kill_switch() function that returns the global instance
+    - Add logging to track when the global instance is created and accessed
+    - Verify monitoring auto-restart logic executes when global instance is created
+    - _Bug_Condition: isBugCondition(input) where input.type == "TelegramCommand" AND createsNewInstance(input) OR input.type == "ServiceRestart" AND monitoringThreadDies()_
+    - _Expected_Behavior: usesGlobalInstance(result) AND monitoringPersists(result) from design_
+    - _Preservation: Threshold checking, position closing, segment deactivation, status persistence remain unchanged_
+    - _Requirements: 2.1, 2.3, 2.4_
+
+  - [x] 3.2 Standardize instance access in telegram_bot.py
+    - Import get_global_kill_switch from start_bot_with_monitor at module level
+    - Replace all direct AdvancedKillSwitch() instantiations with get_global_kill_switch() calls:
+      - Line 257 (/status command)
+      - Line 1334 (/killswitch command)
+      - Line 1938 (another command handler)
+    - Remove all try/except fallback patterns that create new instances:
+      - Lines 1773-1779 (/monitor command)
+      - Lines 1824-1830 (/stopmonitor command)
+      - Lines 1858-1864 (status check)
+      - Lines 1904-1910 (another handler)
+    - Add error logging if get_global_kill_switch() fails instead of creating fallback instances
+    - Note: Line 669 (/reactivate) is excluded - reactivation requires manual OTP verification
+    - _Bug_Condition: isBugCondition(input) where input.command IN ['/monitor', '/stopmonitor', '/status', '/killswitch'] AND createsNewInstance(input)_
+    - _Expected_Behavior: usesGlobalInstance(result) from design_
+    - _Preservation: Command responses, notifications, and functionality remain unchanged_
+    - _Requirements: 2.1, 2.3, 2.5_
+
+  - [x] 3.3 Improve thread resilience in advanced_killswitch.py
+    - Add health check mechanism in is_monitoring() to verify thread is alive
+    - Restart monitoring thread if it died unexpectedly
+    - Add detailed logging for monitoring state changes (start, stop, thread death, restart)
+    - Log instance creation with unique ID for debugging multiple instance issues
+    - Improve is_monitoring() to check both self.monitoring flag AND thread.is_alive()
+    - Return False if flag is True but thread is dead
+    - _Bug_Condition: isBugCondition(input) where input.type == "ServiceRestart" AND monitoringThreadDies()_
+    - _Expected_Behavior: monitoringPersists(result) from design_
+    - _Preservation: Threshold checking, error handling, status persistence remain unchanged_
+    - _Requirements: 2.2, 2.4, 2.5_
+
+  - [x] 3.4 Verify bug condition exploration test now passes
+    - **Property 1: Expected Behavior** - Single Global Instance and Persistent Monitoring
+    - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
+    - The test from task 1 encodes the expected behavior
+    - When this test passes, it confirms the expected behavior is satisfied:
+      - All telegram bot commands use the same global instance
+      - Service restarts do not kill monitoring permanently
+      - No orphaned instances are created
+      - Monitoring state is consistent across all operations
+    - Run bug condition exploration test from step 1
+    - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed)
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6_
+
+  - [x] 3.5 Verify preservation tests still pass
+    - **Property 2: Preservation** - Existing Kill Switch Functionality
+    - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
+    - Run preservation property tests from step 2
+    - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
+    - Confirm all tests still pass after fix:
+      - Threshold checking works correctly
+      - Position closing logic unchanged
+      - Segment deactivation automation unchanged
+      - Status persistence unchanged
+      - Command responses unchanged
+      - Manual activation/deactivation unchanged
+    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6_
+
+- [-] 4. Checkpoint - Ensure all tests pass
+  - Run all unit tests for global instance access
+  - Run all property-based tests for preservation
+  - Run integration tests for full service lifecycle
+  - Verify monitoring persists across service restarts
+  - Verify all telegram bot commands use single global instance
+  - Verify no regressions in kill switch functionality
+  - Ask the user if questions arise

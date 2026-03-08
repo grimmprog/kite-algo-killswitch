@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kite Algo Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen font-sans">
+
+    <!-- Navbar -->
+    <nav class="border-b border-slate-700 bg-slate-800 p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <i data-lucide="activity" class="text-blue-400"></i>
+                Kite Algo <span class="text-slate-500 text-sm font-normal">Trend Pullback Strategy</span>
+            </h1>
+            <div id="status-indicator" class="px-3 py-1 rounded-full text-sm font-medium bg-red-500/20 text-red-400 border border-red-500/50">
+                Stopped
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- Controls -->
+        <div class="col-span-1 space-y-6">
+            <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
+                <h2 class="text-lg font-semibold mb-4 text-slate-300">Control Panel</h2>
+                <div class="flex gap-4">
+                    <button onclick="controlBot('start')" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium transition-colors flex justify-center items-center gap-2">
+                        <i data-lucide="play"></i> Start Bot
+                    </button>
+                    <button onclick="controlBot('stop')" class="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg font-medium transition-colors flex justify-center items-center gap-2">
+                        <i data-lucide="square"></i> Stop Bot
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 rounded-xl p-6 border border-slate-700 shadow-lg">
+                <h2 class="text-lg font-semibold mb-4 text-slate-300">Configuration</h2>
+                <div class="space-y-3 text-sm text-slate-400">
+                    <div class="flex justify-between">
+                        <span>Strategy</span>
+                        <span class="text-white">Trend Pullback</span>
+                    </div>
+                     <div class="flex justify-between">
+                        <span>Max Daily Loss</span>
+                        <span class="text-red-400">₹3,000</span>
+                    </div>
+                     <div class="flex justify-between">
+                        <span>Confidence Threshold</span>
+                        <span class="text-blue-400">70</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logs / Activity -->
+        <div class="col-span-2 bg-slate-800 rounded-xl border border-slate-700 shadow-lg flex flex-col h-[500px]">
+             <div class="p-4 border-b border-slate-700 flex justify-between items-center">
+                <h2 class="text-lg font-semibold text-slate-300">Live Activity Log</h2>
+                <button onclick="clearLogs()" class="text-xs text-slate-500 hover:text-white">Clear</button>
+             </div>
+             <div id="logs-container" class="flex-1 overflow-y-auto p-4 font-mono text-sm space-y-2">
+                <!-- Logs will appear here -->
+                <div class="text-slate-500">[System] Dashboard connected...</div>
+             </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        lucide.createIcons();
+
+        async function updateStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                const el = document.getElementById('status-indicator');
+                if (data.running) {
+                    el.className = "px-3 py-1 rounded-full text-sm font-medium bg-green-500/20 text-green-400 border border-green-500/50";
+                    el.innerText = "Running";
+                } else {
+                     el.className = "px-3 py-1 rounded-full text-sm font-medium bg-red-500/20 text-red-400 border border-red-500/50";
+                    el.innerText = "Stopped";
+                }
+            } catch (e) {
+                console.error("Status fetch failed", e);
+            }
+        }
+
+        async function controlBot(action) {
+            try {
+                const res = await fetch(`/api/${action}`, { method: 'POST' });
+                const data = await res.json();
+                logMessage(`Command ${action}: ${data.status}`);
+                setTimeout(updateStatus, 500);
+            } catch (e) {
+                 logMessage(`Error sending command: ${e}`);
+            }
+        }
+        
+        function logMessage(msg) {
+             const container = document.getElementById('logs-container');
+             const line = document.createElement('div');
+             const time = new Date().toLocaleTimeString();
+             line.innerHTML = `<span class="text-slate-600">[${time}]</span> <span class="text-slate-300">${msg}</span>`;
+             container.prepend(line);
+        }
+
+        // Poll status
+        setInterval(updateStatus, 2000);
+        updateStatus();
+    </script>
+</body>
+</html>
