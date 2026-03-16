@@ -65,6 +65,10 @@ class AdvancedKillSwitch:
         self.last_warning_time = 0  # To prevent spam warnings
         self._stop_event = threading.Event()  # Used to wake thread immediately on stop
         
+        # Auto-killswitch confirmation state
+        self._ks_confirm_event = threading.Event()
+        self._ks_confirmed = False  # True = user confirmed, False = cancelled/timeout
+        
         # Auto-restart monitoring if it was active before restart
         should_monitor = self.load_monitoring_status()
         if should_monitor and not self.is_active:
@@ -224,6 +228,55 @@ class AdvancedKillSwitch:
         except Exception as e:
             return False, f"Segment automation error: {e}"
     
+    def request_auto_ks_confirmation(self, reason, day_pnl, positions, timeout=30):
+        """
+        Send a Telegram confirmation request before auto-triggering kill switch.
+        Returns True if user confirms (or timeout), False if user cancels.
+        """
+        from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+        
+        pos_count = len(positions) if positions else 0
+        keyboard = [[
+            InlineKeyboardButton("⚡ YES, CLOSE NOW", callback_data='auto_ks_confirm'),
+            InlineKeyboardButton("❌ CANCEL", callback_data='auto_ks_cancel')
+        ]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        
+        message = (
+            f"🚨 **AUTO KILL SWITCH TRIGGERED**\n\n"
+            f"**Reason:** {reason}\n"
+            f"**Current P&L:** ₹{day_pnl:,.2f}\n"
+            f"**Open Positions:** {pos_count}\n\n"
+            f"⚠️ Will auto-close in {timeout}s if no response.\n\n"            f"Confirm closing all positions?"
+        )
+        
+        # Reset confirmation state
+        self._ks_confirm_event.clear()
+        self._ks_confirmed = False
+        
+        try:
+            notifier.bot.send_message(
+                chat_id=notifier.chat_id,
+                text=message,
+                parse_mode='Markdown',
+                reply_markup=reply_markup
+            )
+        except Exception as e:
+            logger.error(f"Failed to send confirmation request: {e}")
+            # If we can't send the message, proceed automatically
+            return True
+        
+        # Wait for user response or timeout
+        responded = self._ks_confirm_event.wait(timeout=timeout)
+        
+        if not responded:
+            # Timeout — proceed automatically
+            logger.warning(f"[KillSwitch] Confirmation timeout after {timeout}s — proceeding automatically")
+            notifier.send_message(f"⏱️ No response in {timeout}s — auto kill switch proceeding.")
+            return True
+        
+        return self._ks_confirmed
+
     def close_all_positions(self, reason):
         """Close all open positions"""
         print(f"\n{'=' * 60}")
@@ -504,7 +557,22 @@ class AdvancedKillSwitch:
                     if should_trigger:
                         logger.warning(f"[Monitor] Trigger condition met on instance {id(self)}: {reason}")
                         print(f"[Monitor] Trigger condition met: {reason}")
-                        self.close_all_positions(reason)
+                        
+                        # Only ask for confirmation if there are open positions
+                        positions = self.get_open_positions()
+                        if positions:
+                            proceed = self.request_auto_ks_confirmation(reason, day_pnl, positions, timeout=60)
+                        else:
+                            proceed = True  # No positions — fire immediately
+                        
+                        if proceed:
+                            self.close_all_positions(reason)
+                        else:
+                            logger.info("[Monitor] Kill switch cancelled by user")
+                            notifier.send_message("✅ Auto kill switch cancelled. Monitoring continues.")
+                            self.last_warning_time = time.time()
+                            continue
+                        
                         self.monitoring = False
                         self.save_monitoring_status(False)
                         break

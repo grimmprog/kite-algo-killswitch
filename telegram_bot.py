@@ -466,6 +466,10 @@ class TradingBot:
             self.execute_logout(query)
         elif query.data == 'logout_cancel':
             query.edit_message_text("❌ Logout cancelled")
+        elif query.data == 'auto_ks_confirm':
+            self.auto_ks_confirm_callback(query)
+        elif query.data == 'auto_ks_cancel':
+            self.auto_ks_cancel_callback(query)
     
     def pnl_command_callback(self, query):
         """Detailed P&L from button"""
@@ -663,6 +667,20 @@ class TradingBot:
         else:
             update.message.reply_text(message)
     
+    def auto_ks_confirm_callback(self, query):
+        """User confirmed auto kill switch"""
+        ks = get_global_kill_switch()
+        ks._ks_confirmed = True
+        ks._ks_confirm_event.set()
+        query.edit_message_text("⚡ Confirmed — closing all positions now...")
+
+    def auto_ks_cancel_callback(self, query):
+        """User cancelled auto kill switch"""
+        ks = get_global_kill_switch()
+        ks._ks_confirmed = False
+        ks._ks_confirm_event.set()
+        query.edit_message_text("✅ Auto kill switch cancelled. Monitoring continues.")
+
     def reactivate_command(self, update: Update, context: CallbackContext):
         """Reactivate trading after kill switch"""
         try:
