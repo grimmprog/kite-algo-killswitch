@@ -63,6 +63,7 @@ class AdvancedKillSwitch:
         self.monitoring = False  # Always start as False
         self.monitor_thread = None
         self.last_warning_time = 0  # To prevent spam warnings
+        self._stop_event = threading.Event()  # Used to wake thread immediately on stop
         
         # Auto-restart monitoring if it was active before restart
         should_monitor = self.load_monitoring_status()
@@ -356,6 +357,10 @@ class AdvancedKillSwitch:
     def check_conditions(self, day_pnl, net_pnl):
         """Check if kill switch should be triggered"""
         
+        # Check if monitoring is still active - exit early if not
+        if not self.monitoring:
+            return False, "Monitoring not active"
+        
         # Update highest P&L
         if day_pnl > self.highest_pnl:
             self.highest_pnl = day_pnl
@@ -381,25 +386,34 @@ class AdvancedKillSwitch:
                     return True, f"Profit drawdown: Peak ₹{self.highest_pnl:,.2f} → Current ₹{day_pnl:,.2f} (dropped ₹{drawdown:,.2f})"
         
         # Rule 3: Profit > 10% warning (not auto-trigger, just warning)
-        profit_percent = (day_pnl / self.capital) * 100
-        if profit_percent >= self.profit_warning_percent:
-            # Send warning but don't trigger (only once every 5 minutes)
-            current_time = time.time()
-            if current_time - self.last_warning_time > 300:  # 5 minutes
-                message = (
-                    f"⚠️ **PROFIT WARNING**\n\n"
-                    f"Today's profit: ₹{day_pnl:,.2f} ({profit_percent:.1f}%)\n"
-                    f"Peak P&L: ₹{self.highest_pnl:,.2f}\n\n"
-                    f"Consider:\n"
-                    f"• Booking profits\n"
-                    f"• Activating kill switch manually\n"
-                    f"• Reducing position sizes\n\n"
-                    f"Send /killswitch to check status"
-                )
-                notifier.send_message(message)
-                self.last_warning_time = current_time
+        # Only send warnings if monitoring is active AND market is open
+        if self.monitoring and self.is_market_open():
+            profit_percent = (day_pnl / self.capital) * 100
+            if profit_percent >= self.profit_warning_percent:
+                # Send warning but don't trigger (only once every 5 minutes)
+                current_time = time.time()
+                if current_time - self.last_warning_time > 300:  # 5 minutes
+                    message = (
+                        f"⚠️ **PROFIT WARNING**\n\n"
+                        f"Today's profit: ₹{day_pnl:,.2f} ({profit_percent:.1f}%)\n"
+                        f"Peak P&L: ₹{self.highest_pnl:,.2f}\n\n"
+                        f"Consider:\n"
+                        f"• Booking profits\n"
+                        f"• Activating kill switch manually\n"
+                        f"• Reducing position sizes\n\n"
+                        f"Send /killswitch to check status"
+                    )
+                    notifier.send_message(message)
+                    self.last_warning_time = current_time
         
         return False, "All systems normal"
+    
+    def is_market_open(self):
+        """Check if current time is within market hours (9:15 AM to 3:30 PM)"""
+        now = datetime.now()
+        market_open = now.replace(hour=9, minute=15, second=0, microsecond=0)
+        market_close = now.replace(hour=15, minute=30, second=0, microsecond=0)
+        return market_open <= now <= market_close
     
     def start_monitoring(self, check_interval=5):
         """Start monitoring in background thread"""
@@ -423,7 +437,7 @@ class AdvancedKillSwitch:
         return True, f"Monitoring started (checking every {check_interval}s)"
     
     def stop_monitoring(self):
-        """Stop background monitoring"""
+        """Stop background monitoring immediately"""
         logger.info(f"stop_monitoring called on instance {id(self)}")
         
         if not self.monitoring:
@@ -432,37 +446,25 @@ class AdvancedKillSwitch:
         
         logger.info(f"Stopping monitoring thread on instance {id(self)}")
         self.monitoring = False
+        self.last_warning_time = 0
+        self._stop_event.set()  # Wake the thread immediately from sleep
         self.save_monitoring_status(False)
-        if self.monitor_thread:
-            self.monitor_thread.join(timeout=10)
-            logger.info(f"Monitoring thread stopped on instance {id(self)}")
         
+        if self.monitor_thread and self.monitor_thread.is_alive():
+            self.monitor_thread.join(timeout=5)
+        
+        self._stop_event.clear()
         return True, "Monitoring stopped"
     
     def is_monitoring(self):
         """Check if monitoring is active and thread is alive"""
-        # Check both flag and thread health
-        if self.monitoring:
-            # Verify thread is actually alive
-            if self.monitor_thread is None or not self.monitor_thread.is_alive():
-                logger.warning(f"Monitoring flag is True but thread is dead (instance {id(self)})")
-                logger.info("Attempting to restart monitoring thread...")
-                
-                # Thread died unexpectedly, try to restart it
-                self.monitoring = False  # Reset flag first
-                success, message = self.start_monitoring(check_interval=5)
-                
-                if success:
-                    logger.info(f"Successfully restarted monitoring thread (instance {id(self)})")
-                    return True
-                else:
-                    logger.error(f"Failed to restart monitoring thread: {message}")
-                    return False
-            
-            # Thread is alive and monitoring is active
+        if self.monitoring and self.monitor_thread and self.monitor_thread.is_alive():
             return True
-        
-        # Monitoring flag is False
+        # If flag is True but thread is dead, clean up the stale state
+        if self.monitoring:
+            logger.warning(f"Monitoring flag is True but thread is dead — cleaning up (instance {id(self)})")
+            self.monitoring = False
+            self.save_monitoring_status(False)
         return False
     
     def _monitor_loop(self, check_interval):
@@ -472,10 +474,23 @@ class AdvancedKillSwitch:
         
         try:
             while self.monitoring:
+                # Check if monitoring was turned off while sleeping
+                if not self.monitoring:
+                    logger.info(f"[Monitor] Monitoring flag set to False, exiting loop on instance {id(self)}")
+                    break
+                    
                 if self.is_active:
                     # Kill switch already active, stop monitoring
                     logger.info(f"[Monitor] Kill switch is active, stopping monitoring on instance {id(self)}")
                     print("[Monitor] Kill switch is active, stopping monitoring")
+                    self.monitoring = False
+                    self.save_monitoring_status(False)
+                    break
+                
+                # Check if market is open - if not, exit monitoring thread
+                if not self.is_market_open():
+                    logger.info(f"[Monitor] Market is closed, stopping monitoring thread on instance {id(self)}")
+                    print("[Monitor] Market is closed, stopping monitoring")
                     self.monitoring = False
                     self.save_monitoring_status(False)
                     break
@@ -498,7 +513,8 @@ class AdvancedKillSwitch:
                     logger.error(f"[Monitor] Error in monitoring loop on instance {id(self)}: {e}")
                     print(f"[Monitor] Error in monitoring loop: {e}")
                 
-                time.sleep(check_interval)
+                # Interruptible sleep — wakes immediately if stop_monitoring() is called
+                self._stop_event.wait(timeout=check_interval)
             
             logger.info(f"[Monitor] Thread exiting normally on instance {id(self)}")
                 
