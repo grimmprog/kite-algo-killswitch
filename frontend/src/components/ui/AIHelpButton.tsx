@@ -10,6 +10,8 @@ interface AIHelpButtonProps {
 }
 
 interface AIResponse {
+  success?: boolean;
+  data?: Record<string, unknown>;
   analysis?: string;
   recommendation?: string;
   risk_level?: string;
@@ -17,7 +19,7 @@ interface AIResponse {
   explanation?: string;
   warnings?: string[];
   narrative?: string;
-  [key: string]: unknown;
+  message?: string;
 }
 
 /**
@@ -79,7 +81,7 @@ export function AIHelpButton({ context, data, className = '' }: AIHelpButtonProp
   // Unwrap nested response: API returns {success, data, message}
   const displayData: AIResponse | null = response
     ? (response.data && typeof response.data === 'object' && !Array.isArray(response.data)
-        ? { ...response, ...response.data as Record<string, unknown> }
+        ? { ...response, ...(response.data as AIResponse) }
         : response)
     : null;
 
