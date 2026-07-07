@@ -332,15 +332,19 @@ async def get_option_chain(
             detail=f"No option data found for {index} expiry {expiry_date}",
         )
 
-    # Get spot price using ltp() (works without paid Quote API)
+    # Get spot price
     spot_map = {"NIFTY": "NSE:NIFTY 50", "BANKNIFTY": "NSE:NIFTY BANK", "SENSEX": "BSE:SENSEX"}
     spot_symbol = spot_map.get(index, "NSE:NIFTY 50")
     try:
-        spot_data = kite.ltp([spot_symbol])
+        spot_data = kite.quote([spot_symbol])
         spot_price = spot_data[spot_symbol]["last_price"] if spot_symbol in spot_data else 0
-    except Exception as e:
-        logger.warning("Failed to get spot price for %s: %s", spot_symbol, e)
-        spot_price = 0
+    except Exception:
+        try:
+            spot_data = kite.ltp([spot_symbol])
+            spot_price = spot_data[spot_symbol]["last_price"] if spot_symbol in spot_data else 0
+        except Exception as e:
+            logger.warning("Failed to get spot price for %s: %s", spot_symbol, e)
+            spot_price = 0
 
     # Determine ATM strike range — show ~20 strikes around ATM
     atm_strike = min(all_strikes, key=lambda s: abs(s - spot_price)) if spot_price else all_strikes[len(all_strikes) // 2]
@@ -350,7 +354,7 @@ async def get_option_chain(
     if not range_strikes:
         range_strikes = all_strikes[:30]
 
-    # Get live LTP in batches of 200 (uses ltp() which doesn't need paid Quote API)
+    # Get live quotes in batches of 200 (full quote with OI, volume, bid/ask)
     symbols_to_quote = []
     for strike in range_strikes:
         if strike in ce_instruments:
@@ -363,10 +367,16 @@ async def get_option_chain(
     for i in range(0, len(symbols_to_quote), batch_size):
         batch = symbols_to_quote[i : i + batch_size]
         try:
-            batch_ltp = kite.ltp(batch)
-            quotes.update(batch_ltp)
+            batch_quotes = kite.quote(batch)
+            quotes.update(batch_quotes)
         except Exception as e:
-            logger.error("Failed to fetch LTP batch: %s", e)
+            # Fallback to ltp() if quote() fails
+            logger.warning("quote() failed, trying ltp(): %s", e)
+            try:
+                batch_ltp = kite.ltp(batch)
+                quotes.update(batch_ltp)
+            except Exception as e2:
+                logger.error("ltp() also failed: %s", e2)
 
     # Build response
     strikes_data = []
@@ -378,14 +388,32 @@ async def get_option_chain(
             quote_key = f"{exchange_prefix}:{ce_sym}"
             entry.ce_symbol = ce_sym
             if quote_key in quotes:
-                entry.ce_ltp = quotes[quote_key].get("last_price", 0) or 0
+                q = quotes[quote_key]
+                entry.ce_ltp = q.get("last_price", 0) or 0
+                entry.ce_change = q.get("net_change", 0) or 0
+                entry.ce_oi = q.get("oi", 0) or 0
+                entry.ce_volume = q.get("volume", 0) or 0
+                depth = q.get("depth", {})
+                if depth and depth.get("buy"):
+                    entry.ce_bid = depth["buy"][0].get("price", 0) or 0
+                if depth and depth.get("sell"):
+                    entry.ce_ask = depth["sell"][0].get("price", 0) or 0
 
         if strike in pe_instruments:
             pe_sym = pe_instruments[strike]["tradingsymbol"]
             quote_key = f"{exchange_prefix}:{pe_sym}"
             entry.pe_symbol = pe_sym
             if quote_key in quotes:
-                entry.pe_ltp = quotes[quote_key].get("last_price", 0) or 0
+                q = quotes[quote_key]
+                entry.pe_ltp = q.get("last_price", 0) or 0
+                entry.pe_change = q.get("net_change", 0) or 0
+                entry.pe_oi = q.get("oi", 0) or 0
+                entry.pe_volume = q.get("volume", 0) or 0
+                depth = q.get("depth", {})
+                if depth and depth.get("buy"):
+                    entry.pe_bid = depth["buy"][0].get("price", 0) or 0
+                if depth and depth.get("sell"):
+                    entry.pe_ask = depth["sell"][0].get("price", 0) or 0
 
         strikes_data.append(entry)
 
