@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { DashboardLayout } from '../components/dashboard/DashboardLayout';
 import { Card } from '../components/ui/Card';
+import { AIHelpButton } from '../components/ui/AIHelpButton';
 import { getIndices, getRecommendation } from '../api/indexAnalyzer';
 import type { IndexMetrics, IndexRecommendation, TrendDirection } from '../api/types';
 
@@ -73,14 +74,17 @@ export function AnalysisPage() {
               Compare indices with momentum, volume, and trend scoring
             </p>
           </div>
-          <button
-            onClick={fetchData}
-            disabled={loading}
-            className="px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            aria-label="Refresh analysis data"
-          >
-            {loading ? 'Refreshing…' : 'Refresh'}
-          </button>
+          <div className="flex items-center gap-2">
+            <AIHelpButton context="analysis" />
+            <button
+              onClick={fetchData}
+              disabled={loading}
+              className="px-4 py-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              aria-label="Refresh analysis data"
+            >
+              {loading ? 'Refreshing…' : 'Refresh'}
+            </button>
+          </div>
         </div>
 
         {/* Error message */}

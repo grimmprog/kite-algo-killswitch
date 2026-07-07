@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { DashboardLayout } from '../components/dashboard/DashboardLayout';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { AIHelpButton } from '../components/ui/AIHelpButton';
 import { useScanner } from '../hooks/useScanner';
 import type { ScanSignal } from '../hooks/useScanner';
 
@@ -212,11 +213,14 @@ export function ScannerPage() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Page header */}
-        <div>
-          <h1 className="text-xl font-bold text-dashboard-text">Scanner</h1>
-          <p className="text-sm text-dashboard-muted mt-1">
-            Scan for trading setups across your watchlist
-          </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-dashboard-text">Scanner</h1>
+            <p className="text-sm text-dashboard-muted mt-1">
+              Scan for trading setups across your watchlist
+            </p>
+          </div>
+          <AIHelpButton context="scanner" data={{ action: 'market_scan_analysis' }} />
         </div>
 
         {/* Tabs */}

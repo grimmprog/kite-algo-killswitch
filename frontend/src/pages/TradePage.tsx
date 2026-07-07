@@ -6,6 +6,7 @@ import { Input } from '../components/ui/Input';
 import { TradeConfirmModal } from '../components/trade/TradeConfirmModal';
 import { GTTOrderForm } from '../components/trade/GTTOrderForm';
 import { DhanOrderForm } from '../components/trade/DhanOrderForm';
+import { AIHelpButton } from '../components/ui/AIHelpButton';
 import { post } from '../api/client';
 import { getOptionChain, getExpiries } from '../api/instruments';
 import type { OptionChainResponse } from '../api/types';
@@ -166,7 +167,8 @@ export function TradePage() {
           </div>
           {/* Index + Broker Toggle */}
           <div className="flex items-center gap-3">
-            {/* Index Selector */}
+            {/* AI Help */}
+            <AIHelpButton context="trade" data={{ index: selectedIndex, action: 'entry_suggestion' }} />            {/* Index Selector */}
             <div className="flex items-center gap-1 bg-dashboard-card border border-dashboard-border rounded-lg p-1">
               {(Object.keys(INDEX_CONFIG) as IndexName[]).map((idx) => (
                 <button

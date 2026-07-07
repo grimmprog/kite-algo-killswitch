@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '../components/dashboard/DashboardLayout';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { AIHelpButton } from '../components/ui/AIHelpButton';
 import { get, post } from '../api/client';
 
 interface Order {
@@ -145,6 +146,7 @@ export function TradeHistoryPage() {
             </p>
           </div>
           <div className="flex gap-2">
+            <AIHelpButton context="position" data={{ action: 'review_positions' }} />
             <Button variant="ghost" size="sm" onClick={handleSaveDaily} isLoading={saving}>
               Save Today's P&L
             </Button>
