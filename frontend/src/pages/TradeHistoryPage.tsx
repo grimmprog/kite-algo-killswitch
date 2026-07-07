@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { DashboardLayout } from '../components/dashboard/DashboardLayout';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { get } from '../api/client';
+import { get, post } from '../api/client';
 
 interface Order {
   id: number;
@@ -15,6 +15,23 @@ interface Order {
   status: 'PENDING' | 'COMPLETE' | 'REJECTED' | 'CANCELLED';
   error_message?: string;
   timestamp: string;
+}
+
+interface DailySummary {
+  trade_date: string;
+  gross_pnl: number;
+  total_charges: number;
+  net_pnl: number;
+  opening_capital: number;
+  closing_capital: number;
+  total_trades: number;
+  winning_trades: number;
+  losing_trades: number;
+  max_profit_trade: number;
+  max_loss_trade: number;
+  win_rate: number;
+  capital_change_pct: number;
+  instruments_traded: string[];
 }
 
 interface PaginatedResponse {
@@ -43,8 +60,28 @@ export function TradeHistoryPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [dailySummary, setDailySummary] = useState<DailySummary | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   const totalPages = Math.ceil(total / pageSize);
+
+  // Fetch daily summary
+  useEffect(() => {
+    setSummaryLoading(true);
+    get<DailySummary>('/api/v1/trades/daily-summary')
+      .then((data) => setDailySummary(data))
+      .catch(() => setDailySummary(null))
+      .finally(() => setSummaryLoading(false));
+  }, []);
+
+  const handleSaveDaily = async () => {
+    setSaving(true);
+    try {
+      await post('/api/v1/trades/daily-summary/save');
+    } catch { /* ignore */ }
+    finally { setSaving(false); }
+  };
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -107,10 +144,63 @@ export function TradeHistoryPage() {
               {total} total order{total !== 1 ? 's' : ''}
             </p>
           </div>
-          <Button variant="secondary" size="sm" onClick={fetchOrders}>
-            Refresh
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="ghost" size="sm" onClick={handleSaveDaily} isLoading={saving}>
+              Save Today's P&L
+            </Button>
+            <Button variant="secondary" size="sm" onClick={fetchOrders}>
+              Refresh
+            </Button>
+          </div>
         </div>
+
+        {/* Daily P&L Summary Card */}
+        {!summaryLoading && dailySummary && (
+          <div className={`rounded-xl border p-4 ${dailySummary.net_pnl >= 0 ? 'border-profit/30 bg-profit/5' : 'border-loss/30 bg-loss/5'}`}>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-dashboard-text">Today's Performance</h2>
+              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${dailySummary.net_pnl >= 0 ? 'bg-profit/20 text-profit' : 'bg-loss/20 text-loss'}`}>
+                {dailySummary.capital_change_pct >= 0 ? '+' : ''}{dailySummary.capital_change_pct}%
+              </span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div>
+                <p className="text-[10px] uppercase text-dashboard-muted">Net P&L</p>
+                <p className={`text-lg font-bold font-mono ${dailySummary.net_pnl >= 0 ? 'text-profit' : 'text-loss'}`}>
+                  {dailySummary.net_pnl >= 0 ? '+' : ''}₹{dailySummary.net_pnl.toLocaleString('en-IN')}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase text-dashboard-muted">Capital</p>
+                <p className="text-lg font-bold font-mono text-dashboard-text">
+                  ₹{dailySummary.closing_capital.toLocaleString('en-IN')}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase text-dashboard-muted">Win Rate</p>
+                <p className="text-lg font-bold font-mono text-dashboard-text">
+                  {dailySummary.win_rate}%
+                </p>
+                <p className="text-[10px] text-dashboard-muted">{dailySummary.winning_trades}W / {dailySummary.losing_trades}L</p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase text-dashboard-muted">Charges</p>
+                <p className="text-sm font-mono text-loss">
+                  -₹{dailySummary.total_charges.toLocaleString('en-IN')}
+                </p>
+                <p className="text-[10px] text-dashboard-muted">{dailySummary.total_trades} orders</p>
+              </div>
+            </div>
+            {dailySummary.instruments_traded.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-dashboard-border">
+                <p className="text-[10px] text-dashboard-muted">
+                  Instruments: {dailySummary.instruments_traded.slice(0, 6).join(', ')}
+                  {dailySummary.instruments_traded.length > 6 && ` +${dailySummary.instruments_traded.length - 6} more`}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Filters */}
         <Card padding="sm">

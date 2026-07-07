@@ -50,6 +50,7 @@ from src.api.routers.account import router as account_router
 from src.api.routers.dhan_account import router as dhan_account_router
 from src.api.routers.instruments import router as instruments_router
 from src.api.routers.advanced_orders import router as advanced_orders_router
+from src.api.routers.daily_pnl import router as daily_pnl_router
 from src.api.websocket import socket_app
 from src.api.websocket_relay import start_pubsub_relay, stop_pubsub_relay
 
@@ -124,6 +125,7 @@ app.include_router(account_router)
 app.include_router(dhan_account_router)
 app.include_router(instruments_router)
 app.include_router(advanced_orders_router)
+app.include_router(daily_pnl_router)
 
 # --- Top-level OAuth callback redirect ---
 # Zerodha redirects to /callback, but our API endpoint is at

@@ -67,6 +67,10 @@ celery_app.conf.beat_schedule = {
         "task": "src.workers.auto_login_worker.schedule_auto_logins",
         "schedule": crontab(hour=3, minute=15),  # 8:45 AM IST = 3:15 UTC
     },
+    "save-daily-pnl-3-35-pm": {
+        "task": "src.workers.daily_pnl_worker.save_all_daily_pnl",
+        "schedule": crontab(hour=10, minute=5),  # 3:35 PM IST = 10:05 UTC
+    },
 }
 
 # Auto-discover tasks from workers package
