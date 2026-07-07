@@ -90,7 +90,7 @@ export function useScanner(): UseScannerReturn {
       setIsScanning(true);
       setScanError(null);
       const result = await post<ScanSignal[]>('/api/v1/scanner/trend-pullback');
-      setSignals(result);
+      setSignals(Array.isArray(result) ? result : []);
       setLastScanTime(new Date().toISOString());
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Scan failed';
