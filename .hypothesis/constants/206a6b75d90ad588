@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\workers\auto_monitor_task.py
+# hypothesis_version: 6.156.1
+
+[100, ':', 'DATABASE_URL', 'Monitoring inactive', 'error', 'reason', 'skipped', 'status', 'success', 'true', 'user_id', 'users_dispatched']

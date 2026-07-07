@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\hybrid_trading\config.py
+# hypothesis_version: 6.151.5
+
+[0.3, 0.5, 1.0, 1.2, 1.5, 2.0, 40.0, 60.0, 100000.0, 100, '.json', '.yaml', '.yml', '15m', '1d', '1h', '1m', '30m', '3m', '5m', 'MIS', 'NFO', 'NIFTY', 'NIFTY FUT', 'SystemConfig', 'atr_period', 'atr_spike_threshold', 'automated', 'base_position_size', 'ema_period', 'exchange', 'execution_config', 'execution_mode', 'instruments', 'max_daily_loss_pct', 'max_mr_position_pct', 'max_net_position', 'max_retry_attempts', 'mr_base_size', 'mr_config', 'order_timeout', 'product', 'r', 'risk_config', 'semi-manual', 'start_of_day_capital', 'symbol', 'time_stop_candles', 'timeframe', 'timeframes', 'trend_config', 'vwap_lookback']

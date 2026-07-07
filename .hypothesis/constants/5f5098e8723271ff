@@ -1,0 +1,4 @@
+# file: C:\Users\91967\AppData\Roaming\Python\Python311\site-packages\autobahn\wamp\protocol.py
+# hypothesis_version: 6.151.5
+
+['Inconsistent {}s: {}', 'Internal error: {tb}', "No values for '{}'", 'While firing onJoin', 'While firing onLeave', '__class__', '_wampuris', 'already joined', 'args', 'authid', 'authrole', 'broker', 'callee', 'callee_authid', 'callee_authrole', 'connect', 'default', 'disconnect', 'enc_algo', 'exact', 'forward_for', 'join', 'kwargs', 'leave', 'options', 'public', 'ready', 'realm1', 'traceback', 'utf8', 'wamp.close.normal', 'wildcard', '{0}', '{}.call()', '{}.publish()', '{}.register()', '{}.subscribe()', '{}{}']

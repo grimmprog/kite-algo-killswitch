@@ -1,0 +1,4 @@
+# file: C:\Users\91967\AppData\Roaming\Python\Python311\site-packages\autobahn\twisted\choosereactor.py
+# hypothesis_version: 6.151.5
+
+['.', 'EPollReactor', 'IOCPReactor', 'KQueueReactor', 'SelectReactor', 'bsd', 'darwin', 'install_reactor', 'linux', 'win32']

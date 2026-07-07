@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\api\routers\killswitch.py
+# hypothesis_version: 6.156.1
+
+['/activate', '/api/v1/killswitch', '/deactivate', '/logs', '/status', 'Manual activation', 'active', 'id', 'killswitch', 'message', 'positions_closed', 'reason', 'timestamp', 'true']

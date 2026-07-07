@@ -175,40 +175,49 @@ class ConsolidationBreakoutScanner:
         
         return setup
     
-    def execute_trade(self, setup, quantity=65):
+    def execute_trade(self, setup, quantity=65, auto_approve=False):
         """
         Execute the breakout trade
+        auto_approve: If True, skip telegram confirmation (for bot integration)
         """
         try:
+            # Calculate target (1:2 RR minimum for breakouts)
+            risk = abs(setup['entry_price'] - setup['stop_loss'])
+            target = setup['entry_price'] + (risk * 2)
+            
             # Send Telegram notification
             message = f"""
 🚀 CONSOLIDATION BREAKOUT DETECTED!
 
 Symbol: {setup['symbol']} {setup['strike']} {setup['option_type']}
 Entry Price: ₹{setup['entry_price']:.2f}
+Target: ₹{target:.2f}
 Stop Loss: ₹{setup['stop_loss']:.2f}
 Breakout Strength: {setup['breakout_strength']:.1f}%
 Consolidation: {setup['consolidation_duration']} candles
 
 Range: ₹{setup['range_low']:.2f} - ₹{setup['range_high']:.2f}
 
-Approve to execute?
+Risk: ₹{risk * quantity:,.2f}
+Reward: ₹{risk * 2 * quantity:,.2f}
 """
             
-            # Request confirmation
-            approved = request_confirmation(message, timeout=30)
-            
-            if not approved:
-                logger.info("Trade rejected by user")
-                send_telegram_message("❌ Trade rejected")
-                return False
+            if not auto_approve:
+                # Request confirmation (legacy mode - won't work without interactive bot)
+                approved = request_confirmation(message, timeout=30)
+                
+                if not approved:
+                    logger.info("Trade rejected by user")
+                    send_telegram_message("❌ Trade rejected")
+                    return False
+            else:
+                # Auto-approve mode - just send notification
+                send_telegram_message(message + "\n⚠️ Use /consolidation command for interactive approval")
+                logger.info("Trade notification sent (auto-approve mode)")
+                return True
             
             # Place order (implement your order logic here)
             logger.info("✅ Trade approved - placing order...")
-            
-            # Calculate target (1:2 RR minimum for breakouts)
-            risk = abs(setup['entry_price'] - setup['stop_loss'])
-            target = setup['entry_price'] + (risk * 2)
             
             send_telegram_message(f"""
 ✅ Order Placed!

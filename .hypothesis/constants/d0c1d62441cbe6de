@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\admin\api\market_data.py
+# hypothesis_version: 6.156.1
+
+['/api/market-data', 'BANKNIFTY', 'NIFTY']

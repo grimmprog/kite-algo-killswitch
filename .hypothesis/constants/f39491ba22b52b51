@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\admin\api\risk.py
+# hypothesis_version: 6.156.1
+
+[0.0, 0.5, 100, 404, 500, '/api/risk/{user_id}', 'Database unavailable', 'No risk data', 'User not found']

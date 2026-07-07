@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\api\middleware.py
+# hypothesis_version: 6.156.1
+
+[400, 500, 1000, 'Client error: %s', 'Request failed: %s', 'X-Request-ID', 'duration_ms', 'error', 'method', 'path', 'request_id', 'status_code', 'unknown']

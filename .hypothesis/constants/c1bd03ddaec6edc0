@@ -1,0 +1,4 @@
+# file: C:\Users\91967\AppData\Roaming\Python\Python311\site-packages\autobahn\wamp\role.py
+# hypothesis_version: 6.151.5
+
+[', ', '=', 'DEFAULT_CLIENT_ROLES', 'ROLE', 'ROLE_NAME_TO_CLASS', 'RoleBrokerFeatures', 'RoleCalleeFeatures', 'RoleCallerFeatures', 'RoleDealerFeatures', 'RoleFeatures', '_', 'broker', 'callee', 'caller', 'dealer', 'publisher', 'subscriber', '{0}({1})']

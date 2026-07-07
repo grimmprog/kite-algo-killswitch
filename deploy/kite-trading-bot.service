@@ -1,0 +1,19 @@
+[Unit]
+Description=Kite Trading Bot with Kill Switch Monitoring
+After=network.target redis-server.service kite-algo-backend.service
+Wants=redis-server.service
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/var/www/kite-algo
+EnvironmentFile=/var/www/kite-algo/.env
+ExecStart=/var/www/kite-algo/venv/bin/python /var/www/kite-algo/start_bot_with_monitor.py
+Restart=on-failure
+RestartSec=30
+StandardOutput=append:/var/log/kite-algo/bot_service.log
+StandardError=append:/var/log/kite-algo/bot_service_error.log
+
+[Install]
+WantedBy=multi-user.target

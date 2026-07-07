@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\workers\risk_engine_worker.py
+# hypothesis_version: 6.156.1
+
+[0.0, 90.0, 100, 'BUY', 'DataException', 'GeneralException', 'InputException', 'MARKET', 'MIS', 'NSE', 'NetworkException', 'RedisError', 'SELL', 'TokenException', 'Within limits', 'delta', 'error_type', 'exchange', 'gamma', 'kill_switch', 'killswitch_activated', 'margin', 'margin_used', 'net', 'net_delta', 'net_gamma', 'net_vega', 'order_type', 'pnl', 'positions_closed', 'product', 'quantity', 'reason', 'timestamp', 'tradingsymbol', 'transaction_type', 'trigger_reason', 'true', 'type', 'unknown', 'updated_at', 'user_id', 'vega']

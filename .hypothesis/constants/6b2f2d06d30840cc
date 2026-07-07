@@ -1,0 +1,4 @@
+# file: C:\Users\91967\AppData\Roaming\Python\Python311\site-packages\autobahn\websocket\compress_bzip2.py
+# hypothesis_version: 6.151.5
+
+['PerMessageBzip2', 'PerMessageBzip2Mixin', 'PerMessageBzip2Offer', 'compress_level', 'extension', 'isServer', 'offer', 'permessage-bzip2', 'response']

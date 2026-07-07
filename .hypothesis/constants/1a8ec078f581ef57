@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\database\models\position_monitor.py
+# hypothesis_version: 6.156.1
+
+['0', 'CASCADE', 'NOW()', 'Trade', 'User', 'active', 'closed', 'entry_price', 'false', 'sl_hit', 'status', 'stop_loss', 'target', 'target_hit', 'trades.id', 'trailing_stop_hit', 'users.id']

@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\workers\execution_task.py
+# hypothesis_version: 6.156.1
+
+['COMPLETE', 'DATABASE_URL', 'KITE_API_KEY', 'PENDING', 'execute_order', 'fill_price', 'fill_quantity', 'filled', 'message', 'order_data', 'order_id', 'price', 'quantity', 'status', 'success', 'user_id']

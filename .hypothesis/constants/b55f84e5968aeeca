@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\workers\celery_app.py
+# hypothesis_version: 6.156.1
+
+[3.0, 4.0, 3600, 'Asia/Kolkata', 'REDIS_URL', 'json', 'schedule', 'src.workers', 'task', 'trading_platform']

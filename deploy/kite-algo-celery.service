@@ -1,0 +1,22 @@
+[Unit]
+Description=Kite Algo Trading Platform - Celery Worker
+After=network.target redis-server.service postgresql.service
+Wants=redis-server.service
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/var/www/kite-algo
+EnvironmentFile=/var/www/kite-algo/.env
+ExecStart=/var/www/kite-algo/venv/bin/celery -A src.workers.celery_app worker \
+    --loglevel=info \
+    --concurrency=2 \
+    --logfile=/var/log/kite-algo/celery-worker.log
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

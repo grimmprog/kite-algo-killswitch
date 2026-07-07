@@ -1,0 +1,4 @@
+# file: C:\Users\91967\AppData\Roaming\Python\Python311\site-packages\autobahn\websocket\util.py
+# hypothesis_version: 6.151.5
+
+[443, 65535, '%s:%d', '%s:443', '%s:80', '/', ':', '?', 'create_url', 'invalid port {}', 'parse_url', 'unix', 'unix:%s', 'ws', 'wss']

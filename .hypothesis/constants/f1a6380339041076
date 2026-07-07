@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\admin\api\workers.py
+# hypothesis_version: 6.156.1
+
+[2.0, '/api/workers', 'name', 'offline', 'online', 'schedule', 'schedule_seconds', 'status', 'task', 'tasks', 'total_seconds', 'workers']

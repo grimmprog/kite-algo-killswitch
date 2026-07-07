@@ -1,0 +1,219 @@
+# OWASP ZAP API Scan Configuration
+# Web Trading Platform - Security Testing
+#
+# Usage:
+#   docker run -t ghcr.io/zaproxy/zaproxy:stable zap-api-scan.py \
+#     -t http://localhost:8000/openapi.json \
+#     -f openapi \
+#     -c tests/security/zap_scan_config.yaml
+#
+# Prerequisites:
+#   1. API server running on localhost:8000
+#   2. Docker installed
+#   3. Valid test user credentials configured
+#
+# Scan Types:
+#   - API Scan: Tests REST API endpoints for vulnerabilities
+#   - Baseline Scan: Quick passive scan for common issues
+#   - Full Scan: Active + passive testing (use in staging only)
+
+# ============================================================
+# ZAP API Scan Rules Configuration
+# Format: <rule_id> <action> [<parameter>]
+# Actions: IGNORE, WARN, FAIL
+# ============================================================
+
+# --- Authentication Tests ---
+# 10010 - Cookie No HttpOnly Flag
+10010	WARN
+# 10011 - Cookie Without Secure Flag
+10011	FAIL
+# 10012 - Password Autocomplete in Browser
+10012	WARN
+# 10015 - Incomplete or No Cache-control Header Set
+10015	WARN
+# 10017 - Cross-Domain JavaScript Source File Inclusion
+10017	WARN
+# 10019 - Content-Type Header Missing
+10019	FAIL
+# 10020 - Anti-Clickjacking Header Missing
+10020	WARN
+# 10021 - X-Content-Type-Options Header Missing
+10021	FAIL
+# 10023 - Information Disclosure - Debug Error Messages
+10023	FAIL
+# 10024 - Information Disclosure - Sensitive Data in URI
+10024	FAIL
+# 10025 - Information Disclosure - Sensitive Data in HTTP Referrer Header
+10025	WARN
+# 10027 - Information Disclosure - Suspicious Comments
+10027	IGNORE
+# 10028 - Open Redirect
+10028	FAIL
+# 10029 - Cookie Poisoning
+10029	FAIL
+# 10030 - User Controllable Charset
+10030	WARN
+# 10031 - User Controllable HTML Element Attribute
+10031	WARN
+# 10032 - Viewstate
+10032	IGNORE
+# 10035 - Strict-Transport-Security Header
+10035	FAIL
+# 10036 - HTTP Server Response Header
+10036	WARN
+# 10037 - Server Leaks Information via X-Powered-By
+10037	WARN
+# 10038 - Content Security Policy Header Not Set
+10038	WARN
+# 10039 - X-Backend-Server Header Information Leak
+10039	FAIL
+# 10040 - Secure Pages Include Mixed Content
+10040	FAIL
+# 10049 - Storable and Cacheable Content
+10049	IGNORE
+# 10050 - Retrieved from Cache
+10050	IGNORE
+# 10052 - X-ChromeLogger-Data Header Information Leak
+10052	FAIL
+# 10054 - Cookie without SameSite Attribute
+10054	WARN
+# 10055 - CSP
+10055	WARN
+# 10056 - X-Debug-Token Information Leak
+10056	FAIL
+# 10057 - Username Hash Found
+10057	WARN
+# 10061 - X-AspNet-Version Response Header
+10061	IGNORE
+# 10062 - PII Disclosure
+10062	FAIL
+# 10096 - Timestamp Disclosure
+10096	IGNORE
+# 10097 - Insufficient Site Isolation Against Spectre Vulnerability
+10097	WARN
+# 10098 - Cross-Domain Misconfiguration
+10098	FAIL
+
+# --- Injection Tests ---
+# 40012 - Cross Site Scripting (Reflected)
+40012	FAIL
+# 40014 - Cross Site Scripting (Persistent)
+40014	FAIL
+# 40016 - Cross Site Scripting (Persistent) - Prime
+40016	FAIL
+# 40017 - Cross Site Scripting (Persistent) - Spider
+40017	FAIL
+# 40018 - SQL Injection
+40018	FAIL
+# 40019 - SQL Injection - MySQL
+40019	FAIL
+# 40020 - SQL Injection - Hypersonic SQL
+40020	IGNORE
+# 40021 - SQL Injection - Oracle
+40021	IGNORE
+# 40022 - SQL Injection - PostgreSQL
+40022	FAIL
+# 40024 - SQL Injection - SQLite
+40024	IGNORE
+# 40026 - Cross Site Scripting (DOM Based)
+40026	FAIL
+# 40027 - SQL Injection - MsSQL
+40027	IGNORE
+# 40028 - ELMAH Information Leak
+40028	IGNORE
+# 40029 - Trace.axd Information Leak
+40029	IGNORE
+# 40032 - .htaccess Information Leak
+40032	IGNORE
+# 40034 - .env Information Leak
+40034	FAIL
+# 40035 - Hidden File Finder
+40035	WARN
+# 40038 - Bypassing 403
+40038	WARN
+# 40039 - Web Cache Deception
+40039	WARN
+# 40040 - CORS Misconfiguration
+40040	FAIL
+# 40042 - Spring Actuator Information Leak
+40042	IGNORE
+# 40043 - Log4Shell
+40043	FAIL
+
+# --- API-Specific Tests ---
+# 90001 - Insecure JSF ViewState
+90001	IGNORE
+# 90011 - Charset Mismatch
+90011	WARN
+# 90017 - XSLT Injection
+90017	FAIL
+# 90019 - Server Side Code Injection
+90019	FAIL
+# 90020 - Remote OS Command Injection
+90020	FAIL
+# 90021 - XPath Injection
+90021	FAIL
+# 90023 - XML External Entity Attack
+90023	FAIL
+# 90024 - Generic Padding Oracle
+90024	FAIL
+# 90025 - Expression Language Injection
+90025	FAIL
+# 90028 - Insecure HTTP Method
+90028	FAIL
+# 90029 - SOAP XML Injection
+90029	IGNORE
+# 90030 - WSDL File Detection
+90030	IGNORE
+# 90033 - Loosely Scoped Cookie
+90033	WARN
+# 90034 - Cloud Metadata Potentially Exposed
+90034	FAIL
+
+# ============================================================
+# Target API Endpoints for Trading Platform
+# ============================================================
+# POST /api/auth/login        - Authentication endpoint
+# POST /api/auth/register     - User registration
+# POST /api/auth/refresh      - Token refresh
+# GET  /api/dashboard/*       - Dashboard data
+# POST /api/orders            - Order placement
+# GET  /api/positions         - Position viewing
+# POST /api/killswitch        - Kill switch activation
+# WS   /ws/market-data        - WebSocket market feed
+# GET  /admin/*               - Admin panel endpoints
+
+# ============================================================
+# Authentication Configuration for ZAP
+# ============================================================
+# To authenticate ZAP for testing protected endpoints:
+#
+# 1. Set environment variables:
+#    ZAP_AUTH_HEADER=Authorization
+#    ZAP_AUTH_HEADER_VALUE=Bearer <test_token>
+#
+# 2. Or use ZAP's built-in authentication:
+#    - Method: JSON-based authentication
+#    - Login URL: http://localhost:8000/api/auth/login
+#    - Login Body: {"email": "test@example.com", "password": "TestPass123!"}
+#    - Token extraction: $.access_token
+#    - Header: Authorization: Bearer {token}
+#
+# 3. Session management:
+#    - Type: Cookie/Header-based
+#    - Logged-in indicator: HTTP 200 on /api/dashboard/summary
+#    - Logged-out indicator: HTTP 401
+
+# ============================================================
+# CI/CD Integration
+# ============================================================
+# GitHub Actions example:
+#
+# - name: OWASP ZAP API Scan
+#   uses: zaproxy/action-api-scan@v0.7.0
+#   with:
+#     target: 'http://localhost:8000/openapi.json'
+#     rules_file_name: 'tests/security/zap_scan_config.yaml'
+#     cmd_options: '-f openapi'
+#     fail_action: true

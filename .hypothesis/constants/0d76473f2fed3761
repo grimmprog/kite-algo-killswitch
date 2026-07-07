@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\services\signal_service.py
+# hypothesis_version: 6.156.1
+
+['Signal %d expired', 'ai_explanation', 'ai_quality_rating', 'ai_warnings', 'approved', 'confidence_score', 'countdown_seconds', 'created_at', 'db cannot be None', 'entry_price', 'expired', 'expires_at', 'id', 'max_potential_loss', 'metadata', 'pending', 'rejected', 'remaining_seconds', 'signal_expiry', 'signal_id', 'signal_type', 'status', 'stop_loss', 'symbol', 'target_price']

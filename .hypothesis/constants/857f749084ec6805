@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\database\models\notification.py
+# hypothesis_version: 6.156.1
+
+[255, 'CASCADE', 'NOW()', 'User', 'ai', 'category', 'critical', 'false', 'info', 'killswitch', 'metadata', 'notifications', 'severity', 'signal', 'system', 'threshold', 'trade', 'users.id', 'warning']

@@ -1,0 +1,4 @@
+# file: C:\Users\91967\AppData\Roaming\Python\Python311\site-packages\autobahn\twisted\util.py
+# hypothesis_version: 6.151.5
+
+['<pipe>', '?:{0}', '_tlsConnection', 'peer2str', 'sleep', 'tcp4:{0}:{1}', 'tcp6:{0}:{1}', 'tls-unique', 'transport_channel_id', 'unix:{0}']

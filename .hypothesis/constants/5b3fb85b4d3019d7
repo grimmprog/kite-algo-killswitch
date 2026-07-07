@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\api\routers\trading.py
+# hypothesis_version: 6.156.1
+
+['/api/v1/trades', '/execute', '/status/{task_id}', 'completed', 'exchange', 'execute_order', 'order_type', 'pending', 'price', 'quantity', 'result', 'side', 'status', 'symbol', 'trading', 'true', 'user_id']

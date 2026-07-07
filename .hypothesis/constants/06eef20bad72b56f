@@ -1,0 +1,4 @@
+# file: C:\Users\91967\AppData\Roaming\Python\Python311\site-packages\autobahn\twisted\wamp.py
+# hypothesis_version: 6.151.5
+
+[1.0, 2.5, 5.0, 10.0, 65536, 1048576, 100000000000000, 'Application', 'ApplicationRunner', 'ApplicationSession', 'Service', 'Session', '_session', 'ascii', 'authextra', 'authid', 'authrole', 'before', 'challenge', 'factor', 'hit stop', 'host', 'info', 'initialDelay', 'iterations', 'jitter', 'keylen', 'maxDelay', 'onconnect', 'ondisconnect', 'onjoined', 'onleave', 'port', 'privkey', 'pubkey', 'realm1', 'rs', 'salt', 'secret', 'shutdown', 'utf8', '{0}.{1}', '{klass}.run()', '{klass}.stop()']

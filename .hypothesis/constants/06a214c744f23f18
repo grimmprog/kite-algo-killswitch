@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\workers\position_monitor_worker.py
+# hypothesis_version: 6.156.1
+
+[0.0, 100, ', ', ':', 'DATABASE_URL', 'KITE_API_KEY', 'Kill switch active', 'None', 'active', 'any_met', 'auto_exit_triggered', 'auto_exits_triggered', 'candles', 'closed', 'conditions', 'current_price', 'description', 'details', 'distance_to_sl_pct', 'ema20', 'entry_price', 'error', 'exit_conditions_met', 'exit_reason', 'grade', 'is_met', 'last_price', 'name', 'ok', 'position:auto_exit', 'position:monitor', 'position_id', 'positions_monitored', 'quantity', 'reason', 'skipped', 'spot', 'status', 'stop_loss', 'success', 'symbol', 'target', 'timestamp', 'trade_id', 'trailing_stop_level', 'true', 'unrealized_pnl', 'updated_at', 'user_id', 'users_dispatched', 'vwap']

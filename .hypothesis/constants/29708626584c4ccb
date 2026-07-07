@@ -1,0 +1,4 @@
+# file: C:\Users\91967\AppData\Roaming\Python\Python311\site-packages\autobahn\websocket\utf8validator.py
+# hypothesis_version: 6.151.5
+
+[255, 256, 'Utf8Validator', '_codepoint', '_index', '_state']

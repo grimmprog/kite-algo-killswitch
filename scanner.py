@@ -229,21 +229,25 @@ class Scanner:
             logger.info("✅ Using NSEpy for FREE historical data from NSE")
         
         for symbol in self.watchlist:
-            logger.info(f"Checking {symbol}...")
-            df = self.fetch_ohlc(symbol)
-            
-            if df.empty:
-                logger.warning(f"No data for {symbol}, skipping...")
-                continue
+            try:
+                logger.info(f"Checking {symbol}...")
+                df = self.fetch_ohlc(symbol)
                 
-            signal, msg = strategy_engine.get_signal(df)
-            
-            if signal:
-                logger.info(f"🔥 Signal Found on {symbol}: {msg}")
-                signal['symbol'] = symbol
-                signals.append(signal)
-            else:
-                logger.debug(f"No signal on {symbol}: {msg}")
+                if df.empty:
+                    logger.warning(f"No data for {symbol}, skipping...")
+                    continue
+                    
+                signal, msg = strategy_engine.get_signal(df)
+                
+                if signal:
+                    logger.info(f"🔥 Signal Found on {symbol}: {msg}")
+                    signal['symbol'] = symbol
+                    signals.append(signal)
+                else:
+                    logger.debug(f"No signal on {symbol}: {msg}")
+            except Exception as e:
+                logger.error(f"Error scanning {symbol}: {e}")
+                continue
                 
         return signals
 

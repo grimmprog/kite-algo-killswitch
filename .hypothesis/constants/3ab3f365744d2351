@@ -1,0 +1,4 @@
+# file: C:\Users\91967\AppData\Roaming\Python\Python311\site-packages\autobahn\websocket\types.py
+# hypothesis_version: 6.151.5
+
+[126, 400, 403, 404, 406, 408, 500, 501, 503, '/', 'ConnectionAccept', 'ConnectionDeny', 'ConnectionRequest', 'ConnectionResponse', 'IncomingMessage', 'Message', 'OutgoingMessage', 'code', 'extensions', 'headers', 'host', 'is_binary', 'is_secure', 'localhost', 'origin', 'params', 'path', 'payload', 'peer', 'port', 'protocol', 'protocols', 'reason', 'resource', 'secure_channel_id', 'skip_compress', 'subprotocol', 'useragent', 'version']

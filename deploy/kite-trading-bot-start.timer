@@ -1,0 +1,9 @@
+[Unit]
+Description=Start Kite Trading Bot before market open (8:45 AM IST)
+
+[Timer]
+OnCalendar=Mon..Fri 03:15:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,6 @@
+[Unit]
+Description=Start Kite Trading Bot (triggered by timer at market open)
+
+[Service]
+Type=oneshot
+ExecStart=/bin/systemctl start kite-trading-bot.service

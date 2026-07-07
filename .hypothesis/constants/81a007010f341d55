@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\services\position_monitor_service.py
+# hypothesis_version: 6.156.1
+
+[0.0, 0.001, 100, 'Close above 20 EMA', 'Price touches VWAP', 'active', 'close', 'closed', 'consecutive_green', 'current_price', 'db cannot be None', 'ema_cross', 'entry_price', 'exit_reason', 'open', 'position_id', 'quantity', 'sl_hit', 'symbol', 'target_hit', 'time_based', 'trade_id', 'trailing_stop_hit', 'vwap_touch']

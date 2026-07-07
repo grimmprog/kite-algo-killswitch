@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\api\routers\dashboard.py
+# hypothesis_version: 6.156.1
+
+[0.0, 100, '/api/v1', '/dashboard', '/positions', '/risk', '/trades/history', '0.0', 'BUY', 'OPEN', 'capital_used_pct', 'daily_loss_pct', 'dashboard', 'false', 'killswitch_active', 'margin_used_pct', 'net_delta', 'net_gamma', 'net_vega', 'pnl', 'spot', 'true', 'updated_at']

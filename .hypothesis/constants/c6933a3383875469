@@ -1,0 +1,4 @@
+# file: C:\Users\91967\AppData\Roaming\Python\Python311\site-packages\autobahn\websocket\compress_deflate.py
+# hypothesis_version: 6.151.5
+
+[b'\x00\x00\xff\xff', 'PerMessageDeflate', 'extension', 'is_server', 'max_message_size', 'mem_level', 'no_context_takeover', 'offer', 'permessage-deflate', 'response', 'window_bits']

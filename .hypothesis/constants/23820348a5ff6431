@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\database\models\position.py
+# hypothesis_version: 6.156.1
+
+[0.0, 'CASCADE', 'User', 'margin_used', 'positions', 'users.id']

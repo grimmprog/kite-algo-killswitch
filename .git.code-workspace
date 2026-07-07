@@ -12,5 +12,8 @@
 		{
 			"path": "../kite-mcp-server-source"
 		}
-	]
+	],
+	"settings": {
+		"typescript.autoClosingTags": false
+	}
 }

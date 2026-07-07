@@ -1,0 +1,133 @@
+# Example configuration for Hybrid Trading System
+# Copy this file to config.yaml and customize for your needs
+
+# Timeframes to monitor (1m, 3m, 5m, 15m, 30m, 1h, 1d)
+timeframes:
+  - '1m'
+  - '3m'
+  - '5m'
+  - '15m'
+  - '30m'
+
+# Instruments to trade
+instruments:
+  - 'NIFTY FUT'
+
+# Execution mode: 'automated' or 'semi-manual'
+# automated: Execute all signals automatically
+# semi-manual: Send signals via Telegram and wait for confirmation
+execution_mode: 'automated'
+
+# Starting capital for the day
+start_of_day_capital: 100000.0
+
+# VWAP calculation lookback period (number of candles)
+vwap_lookback: 20
+
+# Number of historical candles to maintain per timeframe
+historical_candles_buffer: 50
+
+# Trend Engine Configuration
+trend_config:
+  # Timeframe for trend detection
+  timeframe: '15m'
+  
+  # Base position size (number of lots)
+  base_position_size: 1
+  
+  # Percentage of position to exit on trend weakening (0.0 to 1.0)
+  partial_exit_percentage: 0.5
+  
+  # ATR multiplier for structure proximity detection
+  structure_proximity_atr_multiplier: 0.5
+  
+  # Candle body size threshold for vertical extension (multiplier of recent average)
+  vertical_extension_body_threshold: 2.0
+  
+  # Distance threshold for vertical extension (ATR multiplier)
+  vertical_extension_distance_threshold: 2.0
+  
+  # Number of candles to wait before detecting trend weakening
+  trend_weakening_candles: 5
+  
+  # Number of consecutive candles with reduced range to signal weakening
+  trend_weakening_reduced_range_count: 3
+  
+  # EMA period for structural reference
+  ema_period: 20
+
+# Mean Reversion Engine Configuration
+mr_config:
+  # Timeframe for mean reversion detection
+  timeframe: '5m'
+  
+  # Base MR position size (number of lots)
+  mr_base_size: 1
+  
+  # Maximum MR position as percentage of trend position (0.0 to 1.0)
+  max_mr_position_pct: 0.3
+  
+  # Maximum number of MR trades per trend leg
+  max_mr_trades_per_leg: 3
+  
+  # Impulse extension threshold (multiplier of recent impulse average)
+  impulse_extension_threshold: 1.5
+  
+  # Number of consecutive large candles to signal extension
+  consecutive_large_candles_threshold: 3
+  
+  # VWAP distance threshold (ATR multiplier)
+  vwap_distance_atr_multiplier: 1.2
+  
+  # Retracement target range (percentage)
+  retracement_target_min: 40.0
+  retracement_target_max: 60.0
+  
+  # Time stop (number of candles)
+  time_stop_candles: 5
+  
+  # Structure touch detection (ATR multiplier)
+  structure_touch_atr_multiplier: 0.3
+  
+  # EMA touch detection (ATR multiplier)
+  ema_touch_atr_multiplier: 0.3
+
+# Risk Management Configuration
+risk_config:
+  # Maximum daily loss as percentage of starting capital
+  max_daily_loss_pct: 2.0
+  
+  # Maximum net position size (number of lots)
+  max_net_position: 10
+  
+  # ATR spike threshold for volatility kill switch (multiplier of recent ATR)
+  atr_spike_threshold: 2.0
+  
+  # Data feed timeout in seconds
+  data_feed_timeout_seconds: 60
+  
+  # Order slippage tolerance as percentage
+  order_slippage_tolerance_pct: 0.5
+  
+  # ATR calculation period
+  atr_period: 14
+
+# Order Execution Configuration
+execution_config:
+  # Trading symbol
+  symbol: 'NIFTY'
+  
+  # Exchange
+  exchange: 'NFO'
+  
+  # Product type (MIS for intraday, NRML for overnight)
+  product: 'MIS'
+  
+  # Order confirmation timeout in seconds
+  order_timeout: 30
+  
+  # Maximum retry attempts for failed orders
+  max_retry_attempts: 3
+  
+  # Retry backoff time in seconds
+  retry_backoff_seconds: 1.0

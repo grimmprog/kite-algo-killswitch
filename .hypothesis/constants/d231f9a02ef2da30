@@ -1,0 +1,4 @@
+# file: C:\Users\91967\AppData\Roaming\Python\Python311\site-packages\autobahn\twisted\websocket.py
+# hypothesis_version: 6.151.5
+
+['<never connected>', 'Starting TLS upgrade', 'abortConnection', 'base64', 'binary', 'connectWS', 'create_client_agent', 'headers', 'host', 'listenWS', 'logic error', 'message', 'origin', 'port', 'process:{}', 'protocols', 'proxy', 'reactor', 'serializers', 'tls-unique', 'useragent', 'ws://', 'wss://']

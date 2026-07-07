@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\database\models\order.py
+# hypothesis_version: 6.156.1
+
+[100, 500, 'CANCELLED', 'CASCADE', 'COMPLETE', 'PENDING', 'REJECTED', 'User', 'orders', 'qty', 'retries', 'status', 'symbol', 'users.id']

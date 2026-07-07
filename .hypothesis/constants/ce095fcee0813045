@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\hybrid_trading\data\candle_builder.py
+# hypothesis_version: 6.151.5
+
+[120, 240, 1440, '15m', '1d', '1h', '1m', '2h', '30m', '3m', '4h', '5m']

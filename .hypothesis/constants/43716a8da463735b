@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\api\websocket.py
+# hypothesis_version: 6.156.1
+
+[',', 'CORS_ORIGINS', 'JWT_SECRET_KEY', 'asgi', 'dev-secret-key', 'killswitch_update', 'order_update', 'position_update', 'risk_update', 'sub', 'token', 'unknown', 'user_id']

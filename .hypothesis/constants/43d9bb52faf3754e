@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\api\error_handlers.py
+# hypothesis_version: 6.156.1
+
+[422, 500, ' -> ', 'Validation failed', 'details', 'error', 'field', 'loc', 'message', 'msg', 'request_id', 'status_code', 'type', 'unknown']

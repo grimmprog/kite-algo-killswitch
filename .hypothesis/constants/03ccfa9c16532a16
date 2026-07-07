@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\hybrid_trading\execution\models.py
+# hypothesis_version: 6.151.5
+
+[0.0, 100, 'CANCELLED', 'COMPLETE', 'PENDING', 'REJECTED', 'long', 'mr', 'short', 'trend']

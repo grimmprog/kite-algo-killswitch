@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\workers\execution_worker.py
+# hypothesis_version: 6.156.1
+
+[b'margin_used', b'true', 0.0, 0.9, 1.0, 'BUY', 'CANCELLED', 'COMPLETE', 'GeneralException', 'InputException', 'Insufficient margin', 'MARKET', 'MIS', 'Margin available', 'NetworkException', 'OPEN', 'Order rejected', 'OrderException', 'REJECTED', 'RedisError', 'SQLAlchemyError', 'TokenException', 'UNKNOWN', 'Unknown', 'Unknown error', 'Valid', 'attempt', 'attempts', 'average_price', 'capital', 'error_type', 'exchange', 'filled', 'filled_quantity', 'killswitch_exit', 'margin_limit', 'margin_used', 'max_retries', 'message', 'order cannot be None', 'order_id', 'order_signature', 'order_symbol', 'order_type', 'price', 'quantity', 'reason', 'redis_key', 'retryable', 'run_risk_engine', 'side', 'status', 'status_message', 'success', 'symbol', 'true', 'unknown', 'user_id']

@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\api\logging_config.py
+# hypothesis_version: 6.156.1
+
+['%Y-%m-%d %H:%M:%S', 'INFO', 'LOG_FILE', 'LOG_LEVEL', 'stdout only', 'utf-8', 'uvicorn.access', 'uvicorn.error']

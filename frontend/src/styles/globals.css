@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Trading theme variables */
+    --color-profit: #22c55e;
+    --color-loss: #ef4444;
+    --color-risk-low: #22c55e;
+    --color-risk-medium: #f59e0b;
+    --color-risk-high: #ef4444;
+    --color-risk-critical: #991b1b;
+
+    /* Dashboard colors */
+    --color-bg-primary: #0f172a;
+    --color-bg-card: #1e293b;
+    --color-border: #334155;
+    --color-text-primary: #f8fafc;
+    --color-text-muted: #94a3b8;
+
+    /* Spacing */
+    --header-height: 4rem;
+    --sidebar-width: 16rem;
+  }
+
+  body {
+    @apply bg-dashboard-bg text-dashboard-text font-sans antialiased;
+    margin: 0;
+    min-height: 100vh;
+  }
+
+  /* Custom scrollbar for dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-dashboard-bg;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-dashboard-border rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-dashboard-muted;
+  }
+}
+
+@layer components {
+  /* P&L display utilities */
+  .pnl-positive {
+    @apply text-profit font-semibold;
+  }
+
+  .pnl-negative {
+    @apply text-loss font-semibold;
+  }
+
+  .pnl-neutral {
+    @apply text-dashboard-muted font-semibold;
+  }
+
+  /* Risk meter gradient */
+  .risk-meter-gradient {
+    background: linear-gradient(
+      to right,
+      var(--color-risk-low),
+      var(--color-risk-medium),
+      var(--color-risk-high),
+      var(--color-risk-critical)
+    );
+  }
+
+  /* Kill switch button states */
+  .killswitch-active {
+    @apply bg-loss text-white animate-pulse-slow;
+  }
+
+  .killswitch-inactive {
+    @apply bg-dashboard-card text-dashboard-muted border border-dashboard-border;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

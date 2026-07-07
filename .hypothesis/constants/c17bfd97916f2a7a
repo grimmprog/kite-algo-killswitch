@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\broker\token_refresh.py
+# hypothesis_version: 6.156.1
+
+[3600, 'User not found', 'expired', 'expiring_soon', 'message', 'missing', 'requires_reauth', 'status', 'valid']

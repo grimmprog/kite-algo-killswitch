@@ -1,0 +1,4 @@
+# file: C:\Users\91967\AppData\Roaming\Python\Python311\site-packages\autobahn\wamp\uri.py
+# hypothesis_version: 6.151.5
+
+['$', '(?P<{0}>[a-z0-9_]+)', '*', '.', 'Pattern', '\\.', '^', '_wampuris', 'convert_starred_uri', 'error', 'exact', 'int', 'invalid URI', 'logic error', 'no match', 'prefix', 'register', 'string', 'subscribe', 'suffix', 'wildcard', '{}']

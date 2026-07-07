@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\services\notification_service.py
+# hypothesis_version: 6.156.1
+
+[0.1, 1.0, 100, 'category', 'created_at', 'db cannot be None', 'id', 'is_read', 'message', 'metadata', 'notifications', 'severity', 'title', 'user_id']

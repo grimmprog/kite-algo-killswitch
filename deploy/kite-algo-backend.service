@@ -1,0 +1,25 @@
+[Unit]
+Description=Kite Algo Trading Platform - FastAPI Backend
+After=network.target postgresql.service redis-server.service
+Wants=redis-server.service postgresql.service
+
+[Service]
+Type=simple
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/var/www/kite-algo
+EnvironmentFile=/var/www/kite-algo/.env
+ExecStart=/var/www/kite-algo/venv/bin/gunicorn src.main:app \
+    --worker-class uvicorn.workers.UvicornWorker \
+    --workers 2 \
+    --bind 127.0.0.1:8000 \
+    --timeout 120 \
+    --access-logfile /var/log/kite-algo/access.log \
+    --error-logfile /var/log/kite-algo/error.log
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

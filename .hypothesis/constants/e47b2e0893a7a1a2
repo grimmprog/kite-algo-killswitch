@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\hybrid_trading\execution\order_executor.py
+# hypothesis_version: 6.151.5
+
+[0.0, 0.1, 0.5, 2.0, 100.0, 100, 'BUY', 'CANCELLED', 'COMPLETE', 'DAY', 'LIMIT', 'MARKET', 'MIS', 'NFO', 'NIFTY24JANFUT', 'PENDING', 'REJECTED', 'SELL', 'average_price', 'completed', 'exchange', 'filled_quantity', 'mr', 'mr_orders', 'net', 'order_id', 'order_type', 'pending', 'price', 'product', 'quantity', 'rejected', 'status', 'status_message', 'success_rate', 'total_orders', 'tradingsymbol', 'transaction_type', 'trend', 'trend_orders', 'validity']

@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\workers\auto_monitor_worker.py
+# hypothesis_version: 6.156.1
+
+[0.1, 1.0, 100.0, 100, 'Monitoring inactive', 'capital', 'current_distance', 'current_pnl', 'current_value', 'daily_loss', 'daily_loss_amount', 'distance_pct', 'distances', 'drawdown', 'drawdown_amount', 'error', 'false', 'is_approaching', 'monitoring_active', 'nearest_distance_pct', 'nearest_threshold', 'none', 'pnl', 'profit_target', 'profit_target_amount', 'reason', 'skipped', 'status', 'success', 'threshold_name', 'threshold_value', 'timestamp', 'true', 'user_id', 'warnings', 'warnings_count']

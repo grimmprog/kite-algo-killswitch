@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\workers\market_data_worker.py
+# hypothesis_version: 6.156.1
+
+[0.0, '400', '401', '403', '429', '502', '503', '504', 'BANKNIFTY', 'CE', 'DataException', 'GeneralException', 'InputException', 'NFO', 'NIFTY', 'NSE:NIFTY 50', 'NSE:NIFTY BANK', 'NetworkException', 'OrderException', 'PE', 'PermissionException', 'TokenException', 'bad request', 'broken pipe', 'category', 'chains', 'connection aborted', 'connection refused', 'connection reset', 'error', 'errors', 'expiry', 'forbidden', 'instrument_type', 'invalid api', 'invalid token', 'last_price', 'ltp', 'name', 'network', 'not found', 'option_type', 'permanent', 'permission denied', 'price', 'prices', 'rate limit', 'spot', 'strike', 'timed out', 'timeout', 'timestamp', 'token expired', 'too many requests', 'tradingsymbol', 'transient', 'unauthorized', 'unreachable', 'volume', 'vwap']

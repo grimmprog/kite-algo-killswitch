@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\cache\redis_keys.py
+# hypothesis_version: 6.156.1
+
+[b'0', 0.0, 300, 'RiskMetrics', 'margin_used', 'net_delta', 'net_gamma', 'net_vega', 'pnl', 'updated_at']

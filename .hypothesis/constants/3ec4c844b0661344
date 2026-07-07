@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\database\models\trade.py
+# hypothesis_version: 6.156.1
+
+[0.0, 'BFO', 'BSE', 'BUY', 'CASCADE', 'CLOSED', 'NFO', 'NSE', 'OPEN', 'SELL', 'User', 'entry_price', 'exchange', 'qty', 'side', 'status', 'symbol', 'trades', 'users.id']

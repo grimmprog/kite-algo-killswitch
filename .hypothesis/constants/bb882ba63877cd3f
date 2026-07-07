@@ -1,0 +1,4 @@
+# file: C:\Users\91967\AppData\Roaming\Python\Python311\site-packages\kiteconnect\ticker.py
+# hypothesis_version: 6.151.5
+
+[2.5, 100.0, 10000.0, 10000000.0, 100, 184, 255, 300, '-python/', '3', '>', 'H', 'I', 'X-Kite-Version', 'a', 'average_traded_price', 'bcd', 'bfo', 'bse', 'bsecds', 'buy', 'cds', 'change', 'close', 'data', 'depth', 'error', 'exchange_timestamp', 'full', 'high', 'indices', 'instrument_token', 'last_price', 'last_trade_time', 'last_traded_quantity', 'low', 'ltp', 'mcx', 'mcxsx', 'mode', 'nfo', 'nse', 'ohlc', 'oi', 'oi_day_high', 'oi_day_low', 'open', 'order', 'orders', 'pong => {}', 'price', 'quantity', 'quote', 'sell', 'subscribe', 'total_buy_quantity', 'total_sell_quantity', 'tradable', 'type', 'unsubscribe', 'utf-8', 'v', 'volume_traded', 'wss://ws.kite.trade']

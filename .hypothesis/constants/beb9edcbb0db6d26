@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\workers\market_data_task.py
+# hypothesis_version: 6.156.1
+
+['BANKNIFTY', 'KITE_ACCESS_TOKEN', 'KITE_API_KEY', 'NIFTY', '_system', 'chains', 'error', 'errors', 'expiry', 'option_chain', 'partial', 'prices', 'spot', 'status', 'success', 'symbols_failed', 'symbols_processed', 'timestamp', 'vwap']

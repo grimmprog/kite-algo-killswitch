@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\database\models\trade_journal.py
+# hypothesis_version: 6.156.1
+
+[100, 255, 'A', 'B', 'C', 'CASCADE', 'D', 'F', 'NOW()', 'Trade', 'User', 'ai_grade', 'bearish', 'bullish', 'confidence_score', 'neutral', 'trade_journal', 'trades.id', 'trend_direction', 'users.id']

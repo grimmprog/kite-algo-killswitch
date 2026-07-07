@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\admin\api\orders.py
+# hypothesis_version: 6.156.1
+
+[422, 500, '/api/validate-order', 'duplicate', 'kill switch', 'kill_switch', 'margin', 'quantity', 'reason', 'side', 'symbol']

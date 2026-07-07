@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\api\schemas.py
+# hypothesis_version: 6.156.1
+
+[128, 255, 'MARKET', '^(BUY|SELL)$', '^(MARKET|LIMIT)$', '^(NSE|NFO|BSE|BFO)$', 'bearer']

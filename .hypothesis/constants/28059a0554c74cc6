@@ -1,0 +1,4 @@
+# file: C:\Users\91967\AppData\Roaming\Python\Python311\site-packages\autobahn\wamp\auth.py
+# hypothesis_version: 6.151.5
+
+[b'$', b'Client Key', b'Server Key', 1000, 1000000, 2147483647, "'salt' must be bytes", '>I', '>Q', 'AuthCryptoSign', 'AuthScram', 'AuthWampCra', 'anonymous', 'argon2id-13', 'ascii', 'authextra', 'authid', 'authrole', 'c={},r={}', 'challenge', 'channel_binding', 'compute_totp', 'compute_wcs', 'cryptosign', 'derive_key', 'generate_totp_secret', 'generate_wcs', 'invalid secret', 'iterations', 'kdf', 'keylen', 'memory', 'n={},r={}', 'nonce', 'password', 'pbkdf2', 'privkey', 'pubkey', 'r={},s={},i={}', 'salt', 'scram', 'secret', 'sha256', 'ticket', 'utf8', 'wampcra', '{0:06d}']

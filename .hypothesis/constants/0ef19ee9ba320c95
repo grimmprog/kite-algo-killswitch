@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\services\signal_pipeline.py
+# hypothesis_version: 6.156.1
+
+['ai_explanation', 'ai_quality_rating', 'ai_warnings', 'confidence_score', 'countdown_seconds', 'created_at', 'entry_price', 'expired', 'expired_at', 'expires_at', 'id', 'max_loss', 'max_potential_loss', 'metadata', 'remaining_seconds', 'scan_type', 'signal', 'signal_id', 'signal_type', 'status', 'stop_loss', 'stop_loss_price', 'symbol', 'target_price', 'timestamp', 'trend_pullback', 'unknown', 'user_id']

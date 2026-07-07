@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\database\models\paper_trade.py
+# hypothesis_version: 6.156.1
+
+[100, '0', '0.0', '40000.0', 'CASCADE', 'CE', 'NOW()', 'PE', 'PaperAccount', 'PaperTrade', 'User', 'account', 'closed', 'dynamic', 'open', 'option_type', 'paper_account', 'paper_accounts', 'paper_accounts.id', 'paper_trades', 'status', 'users.id']

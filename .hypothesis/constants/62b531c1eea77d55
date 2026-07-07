@@ -1,0 +1,4 @@
+# file: C:\Users\91967\AppData\Roaming\Python\Python311\site-packages\service_identity\__init__.py
+# hypothesis_version: 6.151.5
+
+['CertificateError', 'Copyright (c) 2014 ', 'Hynek Schlawack', 'MIT', 'VerificationError', '__version__', 'cryptography', 'hazmat', 'pyopenssl', 'service-identity']

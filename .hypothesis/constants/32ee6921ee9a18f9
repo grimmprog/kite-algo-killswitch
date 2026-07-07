@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\api\routers\auth.py
+# hypothesis_version: 6.156.1
+
+['/api/v1/auth', '/broker-connect', '/login', '/logout', '/refresh', 'Bearer', 'ENCRYPTION_KEY', 'JWT_SECRET_KEY', 'KITE_API_KEY', 'KITE_API_SECRET', 'KITE_REDIRECT_URL', 'WWW-Authenticate', 'access_token', 'auth', 'dev-secret-key', 'message', 'public_token']

@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\hybrid_trading\common\enums.py
+# hypothesis_version: 6.151.5
+
+['downtrend', 'entry_long', 'entry_short', 'exit_full', 'exit_partial', 'extended_down', 'extended_up', 'neutral', 'normal', 'uptrend']

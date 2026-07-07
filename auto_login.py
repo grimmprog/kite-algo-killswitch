@@ -30,6 +30,8 @@ class AutoLogin:
         self.user_id = config.USER_ID
         self.password = config.PASSWORD
         self.totp_key = config.TOTP_KEY
+        # Redirect URL — Zerodha will redirect here after login
+        # The registered URL in Zerodha console should be https://kite.goroomz.in/callback
         self.redirect_url = config.REDIRECT_URL
         self.headless = headless
         self.driver = None
@@ -47,18 +49,29 @@ class AutoLogin:
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument('--window-size=1920,1080')
         chrome_options.add_argument('--disable-blink-features=AutomationControlled')
+        chrome_options.add_argument('--remote-debugging-port=9222')
+        chrome_options.add_argument('--disable-extensions')
+        chrome_options.add_argument('--disable-software-rasterizer')
+        chrome_options.add_argument('--single-process')
         chrome_options.add_experimental_option("excludeSwitches", ["enable-automation"])
         chrome_options.add_experimental_option('useAutomationExtension', False)
         
-        # Linux-specific options
+        # Linux-specific options for headless server environments
         if self.os_type == 'Linux':
-            chrome_options.add_argument('--disable-extensions')
-            chrome_options.add_argument('--disable-software-rasterizer')
+            chrome_options.add_argument('--disable-setuid-sandbox')
             if not os.environ.get('DISPLAY'):
                 chrome_options.add_argument('--headless=new')
         
         try:
-            service = Service(ChromeDriverManager().install())
+            # Try system chromedriver first (apt-installed, works outside snap sandbox)
+            system_chromedriver = '/usr/bin/chromedriver'
+            if os.path.exists(system_chromedriver) and self.os_type == 'Linux':
+                service = Service(system_chromedriver)
+                logger.info("Using system chromedriver at /usr/bin/chromedriver")
+            else:
+                service = Service(ChromeDriverManager().install())
+                logger.info("Using webdriver-manager chromedriver")
+            
             self.driver = webdriver.Chrome(service=service, options=chrome_options)
             self.driver.implicitly_wait(10)
             logger.info(f"Chrome WebDriver initialized on {self.os_type}")
@@ -173,12 +186,33 @@ class AutoLogin:
             current_url = self.driver.current_url
             logger.info(f"Redirected to: {current_url}")
             
-            # Extract request_token from URL
+            # Extract request_token from URL (may be in different positions depending on redirect chain)
             if "request_token=" in current_url:
                 request_token = current_url.split("request_token=")[1].split("&")[0]
                 logger.info(f"✅ Request token obtained: {request_token[:10]}...")
                 return request_token
             else:
+                # Check if the URL is a connection refused page (127.0.0.1 not running)
+                # The request_token might be in the URL even if the page didn't load
+                page_source = self.driver.page_source
+                if "request_token" in page_source:
+                    import re
+                    match = re.search(r'request_token=([a-zA-Z0-9]+)', page_source)
+                    if match:
+                        request_token = match.group(1)
+                        logger.info(f"✅ Request token extracted from page source: {request_token[:10]}...")
+                        return request_token
+                
+                # Try waiting a bit more for the redirect to complete
+                time.sleep(3)
+                current_url = self.driver.current_url
+                logger.info(f"URL after extra wait: {current_url}")
+                
+                if "request_token=" in current_url:
+                    request_token = current_url.split("request_token=")[1].split("&")[0]
+                    logger.info(f"✅ Request token obtained (delayed): {request_token[:10]}...")
+                    return request_token
+                
                 logger.error("Request token not found in URL")
                 logger.error(f"Current URL: {current_url}")
                 return None
@@ -213,12 +247,21 @@ class AutoLogin:
             return None
     
     def save_access_token(self, access_token):
-        """Save access token to file"""
+        """Save access token to file and sync to web platform database"""
         try:
             token_path = os.path.join(config.BASE_DIR, "access_token.txt")
             with open(token_path, "w") as f:
                 f.write(access_token)
             logger.info(f"✅ Access token saved to: {token_path}")
+            
+            # Also sync to web platform database
+            try:
+                from connect import _store_token_in_database
+                _store_token_in_database(access_token)
+                logger.info("✅ Access token synced to web platform database")
+            except Exception as db_err:
+                logger.warning(f"Could not sync token to database (non-fatal): {db_err}")
+            
             return True
         except Exception as e:
             logger.error(f"Failed to save access token: {e}")

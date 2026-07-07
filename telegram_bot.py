@@ -8,6 +8,7 @@ from connect import get_kite_session
 import config
 from datetime import datetime
 import logging
+import pandas as pd
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -54,6 +55,9 @@ class TradingBot:
         dp.add_handler(CommandHandler("scan", self.scan_command))
         dp.add_handler(CommandHandler("consolidation", self.consolidation_command))
         dp.add_handler(CommandHandler("cons", self.consolidation_command))  # Shortcut
+        dp.add_handler(CommandHandler("analyze", self.analyze_command))
+        dp.add_handler(CommandHandler("best", self.best_trade_command))
+        dp.add_handler(CommandHandler("indices", self.analyze_command))  # Alias
         
         # Paper trading commands
         dp.add_handler(CommandHandler("paper", self.paper_command))
@@ -95,7 +99,9 @@ class TradingBot:
             
             "🔍 **Scanning**\n"
             "/scan - Manual scan for setups\n"
-            "/consolidation or /cons - Check consolidations\n\n"
+            "/consolidation or /cons - Check consolidations\n"
+            "/analyze or /indices - Analyze all indices\n"
+            "/best - Get best trading opportunity\n\n"
             
             "📝 **Paper Trading**\n"
             "/paper - Paper trading status\n"
@@ -306,6 +312,20 @@ class TradingBot:
             self.start_monitor_callback(query)
         elif query.data == 'monitor_stop':
             self.stop_monitor_callback(query)
+        elif query.data.startswith('cons_execute_'):
+            self.execute_consolidation_setup(query, context)
+        elif query.data.startswith('cons_details_'):
+            self.show_consolidation_details(query, context)
+        elif query.data.startswith('cons_cancel_'):
+            query.edit_message_text("❌ Consolidation trade cancelled")
+        elif query.data.startswith('index_trade_'):
+            self.execute_index_trade(query, context)
+        elif query.data == 'index_refresh':
+            self.refresh_index_analysis(query, context)
+        elif query.data == 'index_compare':
+            self.compare_indices(query, context)
+        elif query.data == 'index_best_refresh':
+            self.refresh_best_trade(query, context)
     
     def pnl_command_callback(self, query):
         """Detailed P&L from button"""
@@ -548,18 +568,211 @@ class TradingBot:
     
     def scan_command(self, update: Update, context: CallbackContext):
         """Manual scan trigger"""
-        update.message.reply_text("🔍 Scanning for setups...\n\nThis will trigger the scanner manually.")
-        # Add scanner trigger logic here
+        update.message.reply_text("🔍 Scanning for setups...")
+        
+        try:
+            from scanner import market_scanner
+            
+            signals = market_scanner.scan()
+            
+            if not signals:
+                update.message.reply_text(
+                    "📊 **SCAN COMPLETE**\n\n"
+                    "No trading signals found.\n"
+                    "Market conditions not favorable."
+                )
+                return
+            
+            message = f"📊 **SCAN RESULTS**\n\n"
+            message += f"Found {len(signals)} signal(s):\n\n"
+            
+            for i, signal in enumerate(signals, 1):
+                message += (
+                    f"{i}. {signal.get('symbol', 'N/A')}\n"
+                    f"   Signal: {signal.get('signal', 'N/A')}\n"
+                    f"   Confidence: {signal.get('confidence', 'N/A')}\n\n"
+                )
+            
+            update.message.reply_text(message)
+            
+        except Exception as e:
+            logger.error(f"Scan error: {e}")
+            update.message.reply_text(f"❌ Scan failed: {e}")
     
     def consolidation_command(self, update: Update, context: CallbackContext):
         """Check for consolidation setups"""
-        update.message.reply_text(
-            "📊 **Consolidation Scanner**\n\n"
-            "Checking for tight range consolidations...\n"
-            "This feature scans for 20-30 min consolidations\n"
-            "with < 15% range for breakout opportunities."
-        )
-        # Add consolidation scanner logic here
+        update.message.reply_text("📊 Scanning for consolidations...")
+        
+        try:
+            from consolidation_breakout_scanner import ConsolidationBreakoutScanner
+            
+            scanner = ConsolidationBreakoutScanner()
+            
+            # Get NIFTY current level for strike selection
+            # You can make this configurable
+            symbols_to_scan = [
+                ('NIFTY', 25200, 'PE'),
+                ('NIFTY', 25200, 'CE'),
+                ('BANKNIFTY', 54000, 'PE'),
+                ('BANKNIFTY', 54000, 'CE'),
+            ]
+            
+            found_setups = []
+            
+            for symbol, strike, option_type in symbols_to_scan:
+                setup = scanner.scan_for_setup(symbol, strike, option_type)
+                if setup:
+                    found_setups.append(setup)
+            
+            if not found_setups:
+                update.message.reply_text(
+                    "📊 **CONSOLIDATION SCAN COMPLETE**\n\n"
+                    "No consolidation breakouts found.\n\n"
+                    "Looking for:\n"
+                    "• Tight range < 15%\n"
+                    "• 6+ candles (18+ min)\n"
+                    "• Breakout > 10% above range"
+                )
+                return
+            
+            message = f"🚀 **CONSOLIDATION BREAKOUTS FOUND**\n\n"
+            message += f"Found {len(found_setups)} setup(s):\n\n"
+            
+            for i, setup in enumerate(found_setups, 1):
+                message += (
+                    f"{i}. {setup['symbol']} {setup['strike']} {setup['option_type']}\n"
+                    f"   Entry: ₹{setup['entry_price']:.2f}\n"
+                    f"   Stop: ₹{setup['stop_loss']:.2f}\n"
+                    f"   Strength: {setup['breakout_strength']:.1f}%\n"
+                    f"   Duration: {setup['consolidation_duration']} candles\n\n"
+                )
+            
+            # Add action buttons for first setup
+            if found_setups:
+                keyboard = [
+                    [InlineKeyboardButton("✅ Execute First Setup", callback_data=f'cons_execute_0')],
+                    [InlineKeyboardButton("📊 View Details", callback_data=f'cons_details_0')]
+                ]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+                update.message.reply_text(message, reply_markup=reply_markup)
+                
+                # Store setups in context for later use
+                context.bot_data['consolidation_setups'] = found_setups
+            else:
+                update.message.reply_text(message)
+            
+        except Exception as e:
+            logger.error(f"Consolidation scan error: {e}")
+            update.message.reply_text(f"❌ Consolidation scan failed: {e}")
+    
+    def analyze_command(self, update: Update, context: CallbackContext):
+        """Analyze all indices (SENSEX, NIFTY, BANK NIFTY)"""
+        update.message.reply_text("📊 Analyzing SENSEX, NIFTY 50, and BANK NIFTY...")
+        
+        try:
+            from index_analyzer import index_analyzer
+            
+            # Analyze all indices
+            results = index_analyzer.analyze_all_indices()
+            
+            if not results:
+                update.message.reply_text(
+                    "❌ **ANALYSIS FAILED**\n\n"
+                    "Could not fetch data for indices.\n"
+                    "Please try again later."
+                )
+                return
+            
+            # Format report
+            report = index_analyzer.format_analysis_report(results)
+            
+            # Add action buttons for best trade
+            best = results[0]
+            keyboard = [
+                [InlineKeyboardButton(
+                    f"✅ Trade {best['option_symbol']} {best['option_type']} {best['suggested_strike']}", 
+                    callback_data=f'index_trade_{best["option_symbol"]}_{best["option_type"]}_{best["suggested_strike"]}'
+                )],
+                [InlineKeyboardButton("🔄 Refresh Analysis", callback_data='index_refresh')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            update.message.reply_text(report, reply_markup=reply_markup)
+            
+            # Store results in context
+            context.bot_data['index_analysis'] = results
+            
+        except Exception as e:
+            logger.error(f"Index analysis error: {e}")
+            update.message.reply_text(f"❌ Analysis failed: {e}")
+    
+    def best_trade_command(self, update: Update, context: CallbackContext):
+        """Get the single best trading opportunity"""
+        update.message.reply_text("🎯 Finding best trading opportunity...")
+        
+        try:
+            from index_analyzer import index_analyzer
+            
+            # Get best trade
+            best = index_analyzer.get_best_trade()
+            
+            if not best:
+                update.message.reply_text(
+                    "❌ **NO OPPORTUNITIES**\n\n"
+                    "Could not find any trading opportunities.\n"
+                    "Market conditions may not be favorable."
+                )
+                return
+            
+            # Format message
+            score_emoji = "🔥" if best['score'] >= 70 else "✅" if best['score'] >= 50 else "⚠️"
+            
+            message = (
+                f"{score_emoji} **BEST TRADING OPPORTUNITY**\n\n"
+                f"**Index:** {best['index']}\n"
+                f"**Trade:** {best['option_symbol']} {best['option_type']} {best['suggested_strike']}\n"
+                f"**Score:** {best['score']:.0f}/100\n\n"
+                f"**Analysis:**\n"
+                f"• Current Price: ₹{best['current_price']:.2f}\n"
+                f"• 1H Change: {best['change_1h']:+.2f}%\n"
+                f"• 1D Change: {best['change_1d']:+.2f}%\n"
+                f"• Trend: {best['trend']} ({best['trend_strength']})\n"
+                f"• Volatility: {best['atr_pct']:.2f}%\n"
+                f"• Volume: {best['volume_ratio']:.2f}x average\n"
+                f"• Range Position: {best['range_position']:.0f}%\n\n"
+                f"**Trade Details:**\n"
+                f"• Lot Size: {best['lot_size']}\n"
+                f"• Strike: {best['suggested_strike']}\n"
+                f"• Type: {best['option_type']}\n\n"
+            )
+            
+            # Add reasoning
+            if best['score'] >= 70:
+                message += "✅ **Strong Setup** - High conviction trade\n"
+            elif best['score'] >= 50:
+                message += "🟡 **Moderate Setup** - Decent opportunity\n"
+            else:
+                message += "⚠️ **Weak Setup** - Low conviction, trade carefully\n"
+            
+            # Add action buttons
+            keyboard = [
+                [InlineKeyboardButton(
+                    f"✅ Execute Trade", 
+                    callback_data=f'index_trade_{best["option_symbol"]}_{best["option_type"]}_{best["suggested_strike"]}'
+                )],
+                [InlineKeyboardButton("📊 Compare All Indices", callback_data='index_compare')],
+                [InlineKeyboardButton("🔄 Refresh", callback_data='index_best_refresh')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            update.message.reply_text(message, reply_markup=reply_markup)
+            
+            # Store in context
+            context.bot_data['best_trade'] = best
+            
+        except Exception as e:
+            logger.error(f"Best trade error: {e}")
+            update.message.reply_text(f"❌ Failed to find best trade: {e}")
     
     def paper_command(self, update: Update, context: CallbackContext):
         """Paper trading status"""
@@ -747,6 +960,15 @@ class TradingBot:
             
             ks = AdvancedKillSwitch()
             
+            # Analyze positions by exchange
+            if positions:
+                segments_to_disable, exchange_summary = ks.analyze_positions_by_exchange(positions)
+                
+                query.edit_message_text(
+                    f"⚡ Activating Kill Switch...\n\n"
+                    f"Detected positions:\n" + "\n".join([f"• {s}" for s in exchange_summary])
+                )
+            
             # Close positions if any exist
             if positions:
                 query.edit_message_text(f"⚡ Closing {len(positions)} position(s)...")
@@ -773,16 +995,16 @@ class TradingBot:
             else:
                 position_status = "ℹ️ No open positions\n"
             
-            # Always deactivate segments (force mode)
+            # Deactivate relevant segments (smart detection)
             query.edit_message_text(f"{position_status}\n🔄 Deactivating trading segments...")
             
-            # Deactivate all segments
-            from segment_automation import ZerodhaSegmentAutomation
-            
-            automation = ZerodhaSegmentAutomation(headless=True)
-            
-            # Deactivate F&O segment
-            segment_success = automation.deactivate_fno_segment()
+            if positions:
+                segments_to_disable, exchange_summary = ks.analyze_positions_by_exchange(positions)
+                segment_success, segment_message = ks.deactivate_segments(segments_to_disable)
+            else:
+                segment_success = True
+                segment_message = "No segments needed deactivation"
+                segments_to_disable = []
             
             # Mark kill switch as active
             ks.is_active = True
@@ -795,8 +1017,15 @@ class TradingBot:
                 f"{position_status}"
                 f"💰 Final Day P&L: ₹{day_pnl:,.2f}\n"
                 f"🕐 Time: {datetime.now().strftime('%H:%M:%S')}\n\n"
-                f"**Actions Completed:**\n"
             )
+            
+            if positions and exchange_summary:
+                message += "**Position Breakdown:**\n"
+                for summary in exchange_summary:
+                    message += f"• {summary}\n"
+                message += "\n"
+            
+            message += "**Actions Completed:**\n"
             
             if positions:
                 message += f"1. ✅ Positions closed\n"
@@ -805,14 +1034,17 @@ class TradingBot:
             
             message += f"2. ✅ Bot stopped trading\n"
             
-            if segment_success:
-                message += f"3. ✅ F&O segment deactivated\n\n"
-                message += f"🔒 No new F&O trades can be placed.\n\n"
+            if segments_to_disable:
+                if segment_success:
+                    message += f"3. ✅ Segments deactivated: {', '.join(segments_to_disable)}\n\n"
+                    message += f"🔒 Trading disabled on: {', '.join(segments_to_disable).upper()}\n\n"
+                else:
+                    message += f"3. ⚠️ {segment_message}\n\n"
+                    message += f"**MANUAL ACTION REQUIRED:**\n"
+                    message += f"Deactivate segments at:\n"
+                    message += f"https://console.zerodha.com/account/segment-activation\n\n"
             else:
-                message += f"3. ⚠️ Segment deactivation failed\n\n"
-                message += f"**MANUAL ACTION REQUIRED:**\n"
-                message += f"Deactivate segments at:\n"
-                message += f"https://console.zerodha.com/account/segment-activation\n\n"
+                message += f"3. ℹ️ No segments needed deactivation\n\n"
             
             message += f"To reactivate: Send /reactivate"
             
@@ -826,7 +1058,7 @@ class TradingBot:
                     f"Reason: Manual activation via Telegram\n"
                     f"{position_status}"
                     f"Final P&L: ₹{day_pnl:,.2f}\n"
-                    f"Segment: {'✅ Deactivated' if segment_success else '⚠️ Manual action needed'}\n"
+                    f"Segments: {segment_message}\n"
                     f"Time: {datetime.now().strftime('%H:%M:%S')}"
                 )
             except Exception as e:
@@ -1409,6 +1641,343 @@ class TradingBot:
         )
         
         update.message.reply_text(message)
+    
+    def execute_consolidation_setup(self, query, context):
+        """Execute a consolidation breakout setup"""
+        try:
+            # Extract setup index from callback data
+            setup_idx = int(query.data.split('_')[-1])
+            
+            # Get stored setups
+            setups = context.bot_data.get('consolidation_setups', [])
+            
+            if not setups or setup_idx >= len(setups):
+                query.edit_message_text("❌ Setup not found or expired. Run /consolidation again.")
+                return
+            
+            setup = setups[setup_idx]
+            
+            query.edit_message_text("🔄 Executing consolidation breakout trade...")
+            
+            # Calculate quantity (example: ₹2000 risk per trade)
+            risk_per_trade = 2000
+            risk_per_lot = abs(setup['entry_price'] - setup['stop_loss'])
+            quantity = int(risk_per_trade / risk_per_lot) if risk_per_lot > 0 else 65
+            
+            # Calculate target (1:2 RR)
+            risk = abs(setup['entry_price'] - setup['stop_loss'])
+            target = setup['entry_price'] + (risk * 2)
+            
+            # Place order
+            try:
+                # Get instrument token
+                instruments = self.kite.instruments("NFO")
+                inst_df = pd.DataFrame(instruments)
+                
+                option_df = inst_df[
+                    (inst_df['name'] == setup['symbol']) &
+                    (inst_df['strike'] == setup['strike']) &
+                    (inst_df['instrument_type'] == setup['option_type'])
+                ].sort_values('expiry')
+                
+                if option_df.empty:
+                    query.edit_message_text(f"❌ Option instrument not found")
+                    return
+                
+                option = option_df.iloc[0]
+                tradingsymbol = option['tradingsymbol']
+                
+                # Place market order
+                order_id = self.kite.place_order(
+                    variety=self.kite.VARIETY_REGULAR,
+                    exchange='NFO',
+                    tradingsymbol=tradingsymbol,
+                    transaction_type='BUY',
+                    quantity=quantity,
+                    product=self.kite.PRODUCT_MIS,
+                    order_type=self.kite.ORDER_TYPE_MARKET
+                )
+                
+                message = (
+                    f"✅ **CONSOLIDATION BREAKOUT EXECUTED**\n\n"
+                    f"Symbol: {setup['symbol']} {setup['strike']} {setup['option_type']}\n"
+                    f"Entry: ₹{setup['entry_price']:.2f}\n"
+                    f"Target: ₹{target:.2f}\n"
+                    f"Stop Loss: ₹{setup['stop_loss']:.2f}\n"
+                    f"Quantity: {quantity}\n\n"
+                    f"Order ID: {order_id}\n"
+                    f"Breakout Strength: {setup['breakout_strength']:.1f}%\n"
+                    f"Consolidation: {setup['consolidation_duration']} candles\n\n"
+                    f"Risk: ₹{risk * quantity:,.2f}\n"
+                    f"Reward: ₹{risk * 2 * quantity:,.2f}\n"
+                    f"R:R = 1:2"
+                )
+                
+                query.edit_message_text(message)
+                
+                # Send notification
+                try:
+                    from notifier import notifier
+                    notifier.send_message(
+                        f"🚀 **CONSOLIDATION BREAKOUT**\n\n"
+                        f"{tradingsymbol}\n"
+                        f"Entry: ₹{setup['entry_price']:.2f}\n"
+                        f"Target: ₹{target:.2f}\n"
+                        f"SL: ₹{setup['stop_loss']:.2f}\n"
+                        f"Qty: {quantity}\n"
+                        f"Order: {order_id}"
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to send notification: {e}")
+                
+            except Exception as order_error:
+                logger.error(f"Order placement error: {order_error}")
+                query.edit_message_text(f"❌ Order failed: {order_error}")
+                
+        except Exception as e:
+            logger.error(f"Execute consolidation error: {e}")
+            query.edit_message_text(f"❌ Execution failed: {e}")
+    
+    def show_consolidation_details(self, query, context):
+        """Show detailed information about a consolidation setup"""
+        try:
+            # Extract setup index from callback data
+            setup_idx = int(query.data.split('_')[-1])
+            
+            # Get stored setups
+            setups = context.bot_data.get('consolidation_setups', [])
+            
+            if not setups or setup_idx >= len(setups):
+                query.edit_message_text("❌ Setup not found or expired. Run /consolidation again.")
+                return
+            
+            setup = setups[setup_idx]
+            
+            # Calculate metrics
+            risk = abs(setup['entry_price'] - setup['stop_loss'])
+            target = setup['entry_price'] + (risk * 2)
+            range_size = setup['range_high'] - setup['range_low']
+            range_pct = (range_size / setup['range_low']) * 100
+            
+            message = (
+                f"📊 **CONSOLIDATION DETAILS**\n\n"
+                f"**Symbol:** {setup['symbol']} {setup['strike']} {setup['option_type']}\n\n"
+                f"**Breakout:**\n"
+                f"• Direction: {setup['breakout_direction']}\n"
+                f"• Strength: {setup['breakout_strength']:.1f}%\n"
+                f"• Entry: ₹{setup['entry_price']:.2f}\n\n"
+                f"**Consolidation:**\n"
+                f"• Range: ₹{setup['range_low']:.2f} - ₹{setup['range_high']:.2f}\n"
+                f"• Range Size: {range_pct:.1f}%\n"
+                f"• Duration: {setup['consolidation_duration']} candles ({setup['consolidation_duration'] * 3} min)\n\n"
+                f"**Trade Plan:**\n"
+                f"• Entry: ₹{setup['entry_price']:.2f}\n"
+                f"• Target: ₹{target:.2f} (1:2 RR)\n"
+                f"• Stop Loss: ₹{setup['stop_loss']:.2f}\n"
+                f"• Risk per lot: ₹{risk:.2f}\n\n"
+                f"**Time:** {setup['timestamp'].strftime('%H:%M:%S')}"
+            )
+            
+            keyboard = [
+                [InlineKeyboardButton("✅ Execute Trade", callback_data=f'cons_execute_{setup_idx}')],
+                [InlineKeyboardButton("❌ Cancel", callback_data=f'cons_cancel_{setup_idx}')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            query.edit_message_text(message, reply_markup=reply_markup)
+            
+        except Exception as e:
+            logger.error(f"Show consolidation details error: {e}")
+            query.edit_message_text(f"❌ Error: {e}")
+    
+    def execute_index_trade(self, query, context):
+        """Execute trade based on index analysis"""
+        try:
+            # Parse callback data: index_trade_NIFTY_CE_25200
+            parts = query.data.split('_')
+            symbol = parts[2]
+            option_type = parts[3]
+            strike = int(parts[4])
+            
+            query.edit_message_text(f"🔄 Executing {symbol} {option_type} {strike}...")
+            
+            # Get instrument details
+            instruments = self.kite.instruments("NFO")
+            inst_df = pd.DataFrame(instruments)
+            
+            option_df = inst_df[
+                (inst_df['name'] == symbol) &
+                (inst_df['strike'] == strike) &
+                (inst_df['instrument_type'] == option_type)
+            ].sort_values('expiry')
+            
+            if option_df.empty:
+                query.edit_message_text(f"❌ Option not found: {symbol} {strike} {option_type}")
+                return
+            
+            option = option_df.iloc[0]
+            tradingsymbol = option['tradingsymbol']
+            
+            # Calculate quantity (₹2000 risk per trade)
+            risk_per_trade = 2000
+            # Estimate option price (you may want to fetch live price)
+            estimated_price = 100  # Placeholder
+            quantity = int(risk_per_trade / estimated_price)
+            
+            # Place order
+            order_id = self.kite.place_order(
+                variety=self.kite.VARIETY_REGULAR,
+                exchange='NFO',
+                tradingsymbol=tradingsymbol,
+                transaction_type='BUY',
+                quantity=quantity,
+                product=self.kite.PRODUCT_MIS,
+                order_type=self.kite.ORDER_TYPE_MARKET
+            )
+            
+            message = (
+                f"✅ **TRADE EXECUTED**\n\n"
+                f"Symbol: {tradingsymbol}\n"
+                f"Type: {option_type}\n"
+                f"Strike: {strike}\n"
+                f"Quantity: {quantity}\n"
+                f"Order ID: {order_id}\n\n"
+                f"Based on index analysis recommendation"
+            )
+            
+            query.edit_message_text(message)
+            
+            # Send notification
+            try:
+                from notifier import notifier
+                notifier.send_message(
+                    f"✅ **INDEX TRADE EXECUTED**\n\n"
+                    f"{tradingsymbol}\n"
+                    f"Qty: {quantity}\n"
+                    f"Order: {order_id}"
+                )
+            except Exception as e:
+                logger.error(f"Failed to send notification: {e}")
+                
+        except Exception as e:
+            logger.error(f"Execute index trade error: {e}")
+            query.edit_message_text(f"❌ Trade execution failed: {e}")
+    
+    def refresh_index_analysis(self, query, context):
+        """Refresh index analysis"""
+        query.edit_message_text("🔄 Refreshing analysis...")
+        
+        try:
+            from index_analyzer import index_analyzer
+            
+            results = index_analyzer.analyze_all_indices()
+            
+            if not results:
+                query.edit_message_text("❌ Could not refresh analysis")
+                return
+            
+            report = index_analyzer.format_analysis_report(results)
+            
+            best = results[0]
+            keyboard = [
+                [InlineKeyboardButton(
+                    f"✅ Trade {best['option_symbol']} {best['option_type']} {best['suggested_strike']}", 
+                    callback_data=f'index_trade_{best["option_symbol"]}_{best["option_type"]}_{best["suggested_strike"]}'
+                )],
+                [InlineKeyboardButton("🔄 Refresh Again", callback_data='index_refresh')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            query.edit_message_text(report, reply_markup=reply_markup)
+            context.bot_data['index_analysis'] = results
+            
+        except Exception as e:
+            logger.error(f"Refresh analysis error: {e}")
+            query.edit_message_text(f"❌ Refresh failed: {e}")
+    
+    def compare_indices(self, query, context):
+        """Show comparison of all indices"""
+        try:
+            results = context.bot_data.get('index_analysis', [])
+            
+            if not results:
+                query.edit_message_text("❌ No analysis data. Run /analyze first.")
+                return
+            
+            message = "📊 **INDEX COMPARISON**\n\n"
+            
+            for i, result in enumerate(results, 1):
+                emoji = "🏆" if i == 1 else "🥈" if i == 2 else "🥉"
+                message += (
+                    f"{emoji} **{result['index']}**\n"
+                    f"   Score: {result['score']:.0f}/100\n"
+                    f"   Trend: {result['trend_strength']}\n"
+                    f"   Suggested: {result['option_type']} {result['suggested_strike']}\n"
+                    f"   1H: {result['change_1h']:+.2f}% | Vol: {result['volume_ratio']:.2f}x\n\n"
+                )
+            
+            keyboard = [
+                [InlineKeyboardButton("🔄 Refresh", callback_data='index_refresh')],
+                [InlineKeyboardButton("« Back", callback_data='index_best_refresh')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            query.edit_message_text(message, reply_markup=reply_markup)
+            
+        except Exception as e:
+            logger.error(f"Compare indices error: {e}")
+            query.edit_message_text(f"❌ Comparison failed: {e}")
+    
+    def refresh_best_trade(self, query, context):
+        """Refresh best trade recommendation"""
+        query.edit_message_text("🎯 Finding best opportunity...")
+        
+        try:
+            from index_analyzer import index_analyzer
+            
+            best = index_analyzer.get_best_trade()
+            
+            if not best:
+                query.edit_message_text("❌ No opportunities found")
+                return
+            
+            score_emoji = "🔥" if best['score'] >= 70 else "✅" if best['score'] >= 50 else "⚠️"
+            
+            message = (
+                f"{score_emoji} **BEST TRADING OPPORTUNITY**\n\n"
+                f"**Index:** {best['index']}\n"
+                f"**Trade:** {best['option_symbol']} {best['option_type']} {best['suggested_strike']}\n"
+                f"**Score:** {best['score']:.0f}/100\n\n"
+                f"**Analysis:**\n"
+                f"• Price: ₹{best['current_price']:.2f} ({best['change_1h']:+.2f}% 1H)\n"
+                f"• Trend: {best['trend']} ({best['trend_strength']})\n"
+                f"• Volatility: {best['atr_pct']:.2f}%\n"
+                f"• Volume: {best['volume_ratio']:.2f}x\n\n"
+            )
+            
+            if best['score'] >= 70:
+                message += "✅ Strong Setup - High conviction\n"
+            elif best['score'] >= 50:
+                message += "🟡 Moderate Setup - Decent opportunity\n"
+            else:
+                message += "⚠️ Weak Setup - Low conviction\n"
+            
+            keyboard = [
+                [InlineKeyboardButton(
+                    f"✅ Execute Trade", 
+                    callback_data=f'index_trade_{best["option_symbol"]}_{best["option_type"]}_{best["suggested_strike"]}'
+                )],
+                [InlineKeyboardButton("📊 Compare All", callback_data='index_compare')],
+                [InlineKeyboardButton("🔄 Refresh", callback_data='index_best_refresh')]
+            ]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            
+            query.edit_message_text(message, reply_markup=reply_markup)
+            context.bot_data['best_trade'] = best
+            
+        except Exception as e:
+            logger.error(f"Refresh best trade error: {e}")
+            query.edit_message_text(f"❌ Refresh failed: {e}")
     
     def start(self):
         """Start the bot"""

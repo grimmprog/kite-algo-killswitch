@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\admin\api\seed.py
+# hypothesis_version: 6.156.1
+
+[-0.5, 0.02, 0.03, 0.2, 0.5, 0.7, -100, 100, 300, 5000, 22000, 23000, 46000, 48000, 50000, 100000, 200000, '/api/seed', '/api/seed/clear', '2025-01-30', 'BANKNIFTY', 'BANKNIFTY:SELL:25', 'CE', 'NIFTY', 'NIFTY:BUY:50', 'PE', 'capital', 'cleared', 'expiry', 'ltp', 'margin_used', 'market_data', 'market_ticks', 'message', 'net_delta', 'net_gamma', 'net_vega', 'option_chain', 'option_type', 'pnl', 'price', 'recent_orders_user_1', 'risk_metrics', 'seeded', 'spot', 'status', 'strike', 'success', 'timestamp', 'tradingsymbol', 'updated_at', 'user_id', 'volume', 'vwap']

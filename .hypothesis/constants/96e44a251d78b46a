@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\database\models\scan_signal.py
+# hypothesis_version: 6.156.1
+
+[100, '60', 'CASCADE', 'NOW()', 'User', 'approved', 'confidence_score', 'entry_price', 'expired', 'metadata', 'pending', 'rejected', 'scan_signals', 'signal_type', 'status', 'stop_loss', 'target_price', 'trend_pullback', 'users.id']

@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\database\models\killswitch_log.py
+# hypothesis_version: 6.156.1
+
+[500, 'User', 'killswitch_logs', 'trigger_reason', 'users.id']

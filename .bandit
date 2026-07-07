@@ -1,0 +1,9 @@
+[bandit]
+# Exclude test files, virtual environments, and non-production code from security scanning
+exclude = tests,test_*.py,.venv,.hypothesis,__pycache__,alembic,node_modules,frontend,.git
+# Scan recursively
+recursive = true
+# Skip tests that produce false positives in this project:
+# B311: random module usage in seed data generation (not security-sensitive)
+# B105: "bearer" token_type string (standard OAuth2 pattern, not a real password)
+skips = B311,B105

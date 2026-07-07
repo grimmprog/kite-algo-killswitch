@@ -1,0 +1,4 @@
+# file: C:\Users\91967\AppData\Roaming\Python\Python311\site-packages\autobahn\wamp\exception.py
+# hypothesis_version: 6.151.5
+
+['...', ':\n', 'ApplicationError', 'Error', 'InvalidUri', 'NotAuthorized', 'ProtocolError', 'SerializationError', 'SessionNotReady', 'TransportLost', 'callee', 'callee_authid', 'callee_authrole', 'enc_algo', 'forward_for', 'traceback', 'utf8', 'wamp.error.canceled', 'wamp.error.timeout', '{0}: {1}']

@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\workers\risk_engine_task.py
+# hypothesis_version: 6.156.1
+
+['DATABASE_URL', 'KITE_API_KEY', 'Risk check completed', 'capital', 'error', 'reason', 'skipped', 'status', 'success', 'true', 'user_id', 'users_dispatched']

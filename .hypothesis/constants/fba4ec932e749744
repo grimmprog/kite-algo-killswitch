@@ -1,0 +1,4 @@
+# file: C:\Users\91967\AppData\Roaming\Python\Python311\site-packages\service_identity\hazmat.py
+# hypothesis_version: 6.151.5
+
+[b'\x00', b'*', b'.', b':', b'ABCDEFGHIJKLMNOPQRSTUVWXYZ', b'^[a-z0-9\\-_.]+$', b'_', b'abcdefghijklmnopqrstuvwxyz', b'xn--', 127, '*', '.', '/', '1', ':', 'Invalid DNS-ID.', 'Invalid SRV-ID.', 'Invalid URI-ID.', '_', 'ascii']

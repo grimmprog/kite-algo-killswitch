@@ -1,0 +1,4 @@
+# file: C:\Users\91967\kite\ZerodhaPythonScripts\kite-algo\src\admin\sse.py
+# hypothesis_version: 6.156.1
+
+[2.0, 101, '/sse', 'BANKNIFTY', 'Cache-Control', 'Connection', 'NIFTY', 'X-Accel-Buffering', 'active', 'keep-alive', 'killswitch_status', 'margin_used', 'market_data', 'name', 'net_delta', 'net_gamma', 'net_vega', 'no', 'no-cache', 'offline', 'online', 'pnl', 'risk_metrics', 'schedule', 'schedule_seconds', 'status', 'task', 'tasks', 'text/event-stream', 'total_seconds', 'true', 'updated_at', 'worker_status', 'workers']

@@ -90,13 +90,103 @@ class AdvancedKillSwitch:
             return 0, 0
     
     def get_open_positions(self):
-        """Get open positions"""
+        """Get open positions with exchange information"""
         try:
             positions = self.kite.positions()['net']
             return [pos for pos in positions if pos['quantity'] != 0]
         except Exception as e:
             print(f"Error fetching positions: {e}")
             return []
+    
+    def analyze_positions_by_exchange(self, positions):
+        """Analyze positions and determine which exchanges/segments to disable"""
+        exchange_info = {
+            'NFO': {'has_positions': False, 'pnl': 0, 'count': 0, 'segment': 'nfo'},
+            'BFO': {'has_positions': False, 'pnl': 0, 'count': 0, 'segment': 'bfo'},
+            'NSE': {'has_positions': False, 'pnl': 0, 'count': 0, 'segment': 'equity'},
+            'BSE': {'has_positions': False, 'pnl': 0, 'count': 0, 'segment': 'bse_equity'}
+        }
+        
+        for pos in positions:
+            exchange = pos.get('exchange', '')
+            pnl = pos.get('pnl', 0)
+            
+            if exchange in exchange_info:
+                exchange_info[exchange]['has_positions'] = True
+                exchange_info[exchange]['pnl'] += pnl
+                exchange_info[exchange]['count'] += 1
+        
+        # Determine which segments to disable (only those with positions)
+        segments_to_disable = []
+        exchange_summary = []
+        
+        for exchange, info in exchange_info.items():
+            if info['has_positions']:
+                segments_to_disable.append(info['segment'])
+                exchange_summary.append(
+                    f"{exchange}: {info['count']} position(s), P&L: ₹{info['pnl']:,.2f}"
+                )
+        
+        return segments_to_disable, exchange_summary
+    
+    def deactivate_segments(self, segments_to_disable):
+        """Deactivate specific segments based on positions"""
+        if not segments_to_disable:
+            print("No segments to deactivate (no positions found)")
+            return True, "No segments needed deactivation"
+        
+        print(f"\nSegments to deactivate: {', '.join(segments_to_disable)}")
+        
+        try:
+            from segment_automation import ZerodhaSegmentAutomation
+            
+            automation = ZerodhaSegmentAutomation(headless=True)
+            
+            # Login
+            if not automation.login_to_zerodha_selenium():
+                return False, "Login failed"
+            
+            # Navigate to segment page
+            automation.driver.get("https://console.zerodha.com/account/segment-activation")
+            time.sleep(3)
+            
+            if "login" in automation.driver.current_url.lower():
+                automation.close()
+                return False, "Failed to navigate to segment page"
+            
+            # Deactivate each segment
+            success_count = 0
+            failed_segments = []
+            
+            for segment in segments_to_disable:
+                print(f"Deactivating {segment}...")
+                try:
+                    success = automation.toggle_segment(segment, activate=False)
+                    if success:
+                        success_count += 1
+                        print(f"  ✅ {segment} deactivated")
+                    else:
+                        failed_segments.append(segment)
+                        print(f"  ❌ {segment} failed")
+                except Exception as e:
+                    failed_segments.append(segment)
+                    print(f"  ❌ {segment} error: {e}")
+            
+            # Click Continue to save
+            if not automation.click_continue_button():
+                print("⚠️ Could not click Continue button")
+            
+            automation.close()
+            
+            if success_count == len(segments_to_disable):
+                return True, f"All {success_count} segment(s) deactivated"
+            elif success_count > 0:
+                return False, f"Partial: {success_count}/{len(segments_to_disable)} deactivated. Failed: {', '.join(failed_segments)}"
+            else:
+                return False, f"Failed to deactivate: {', '.join(failed_segments)}"
+                
+        except Exception as e:
+            return False, f"Segment automation error: {e}"
     
     def close_all_positions(self, reason):
         """Close all open positions"""
@@ -111,18 +201,27 @@ class AdvancedKillSwitch:
         else:
             print(f"Closing {len(positions)} position(s)...\n")
             
+            # Analyze positions by exchange
+            segments_to_disable, exchange_summary = self.analyze_positions_by_exchange(positions)
+            
+            print("Position Analysis:")
+            for summary in exchange_summary:
+                print(f"  • {summary}")
+            print()
+            
             success_count = 0
             for pos in positions:
                 symbol = pos['tradingsymbol']
                 quantity = abs(pos['quantity'])
                 transaction_type = "SELL" if pos['quantity'] > 0 else "BUY"
+                exchange = pos['exchange']
                 
-                print(f"Closing {symbol}: {transaction_type} {quantity}...")
+                print(f"Closing {symbol} ({exchange}): {transaction_type} {quantity}...")
                 
                 try:
                     order_id = self.kite.place_order(
                         variety=self.kite.VARIETY_REGULAR,
-                        exchange=pos['exchange'],
+                        exchange=exchange,
                         tradingsymbol=symbol,
                         transaction_type=transaction_type,
                         quantity=quantity,
@@ -144,27 +243,34 @@ class AdvancedKillSwitch:
         time.sleep(2)
         day_pnl, _ = self.get_total_pnl()
         
-        # Deactivate F&O segment automatically
+        # Deactivate relevant segments automatically
         print("\n" + "=" * 60)
-        print("DEACTIVATING F&O SEGMENT")
+        print("DEACTIVATING SEGMENTS")
         print("=" * 60)
         
-        try:
-            from segment_automation import ZerodhaSegmentAutomation
+        if positions:
+            segments_to_disable, exchange_summary = self.analyze_positions_by_exchange(positions)
             
-            print("Starting segment automation...")
-            automation = ZerodhaSegmentAutomation(headless=True)
-            segment_success = automation.deactivate_fno_segment()
-            
-            if segment_success:
-                print("✅ F&O segment deactivated successfully!")
-                segment_status = "✅ F&O segment deactivated"
+            if segments_to_disable:
+                print(f"Detected positions on: {', '.join(segments_to_disable)}")
+                print("Deactivating only relevant segments...\n")
+                
+                segment_success, segment_message = self.deactivate_segments(segments_to_disable)
+                
+                if segment_success:
+                    print(f"✅ {segment_message}")
+                    segment_status = f"✅ Segments deactivated: {', '.join(segments_to_disable)}"
+                else:
+                    print(f"⚠️ {segment_message}")
+                    segment_status = f"⚠️ {segment_message}"
             else:
-                print("❌ Failed to deactivate segment automatically")
-                segment_status = "⚠️ Manual segment deactivation required"
-        except Exception as e:
-            print(f"❌ Segment automation error: {e}")
-            segment_status = "⚠️ Manual segment deactivation required"
+                print("No segments to deactivate (no positions found)")
+                segment_success = True
+                segment_status = "ℹ️ No segments needed deactivation"
+        else:
+            print("No positions found, skipping segment deactivation")
+            segment_success = True
+            segment_status = "ℹ️ No positions to analyze"
         
         # Send comprehensive notification
         message = (
@@ -173,17 +279,26 @@ class AdvancedKillSwitch:
             f"**Final P&L:** ₹{day_pnl:,.2f}\n"
             f"**Positions Closed:** {success_count}/{len(positions) if positions else 0}\n"
             f"**Time:** {datetime.now().strftime('%H:%M:%S')}\n\n"
-            f"**Segment Status:**\n{segment_status}\n\n"
+        )
+        
+        if positions and exchange_summary:
+            message += "**Position Breakdown:**\n"
+            for summary in exchange_summary:
+                message += f"• {summary}\n"
+            message += "\n"
+        
+        message += f"**Segment Status:**\n{segment_status}\n\n"
+        message += (
             f"**Actions Taken:**\n"
             f"1. ✅ All positions closed\n"
             f"2. ✅ Bot stopped trading\n"
-            f"3. {'✅' if segment_success else '⚠️'} F&O segment {'deactivated' if segment_success else 'needs manual deactivation'}\n\n"
+            f"3. {'✅' if segment_success else '⚠️'} Segments {'deactivated' if segment_success else 'need manual action'}\n\n"
         )
         
         if not segment_success:
             message += (
                 f"⚠️ **MANUAL ACTION REQUIRED:**\n"
-                f"Deactivate F&O segment at:\n"
+                f"Deactivate segments manually at:\n"
                 f"https://console.zerodha.com/account/segment-activation\n\n"
             )
         
@@ -195,7 +310,7 @@ class AdvancedKillSwitch:
         if not segment_success:
             print("⚠️  MANUAL ACTION REQUIRED:")
             print("=" * 60)
-            print("1. Deactivate F&O segment at:")
+            print("1. Deactivate segments manually at:")
             print("   https://console.zerodha.com/account/segment-activation")
             print("2. This prevents any accidental trades")
         print("3. Review your trades for today")
