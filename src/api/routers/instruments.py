@@ -244,10 +244,10 @@ async def get_option_chain(
     Results are cached for 5 seconds.
     """
     index = index.upper()
-    if index not in ("NIFTY", "BANKNIFTY"):
+    if index not in ("NIFTY", "BANKNIFTY", "SENSEX"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Index must be NIFTY or BANKNIFTY",
+            detail="Index must be NIFTY, BANKNIFTY, or SENSEX",
         )
 
     # Check cache first
@@ -300,10 +300,11 @@ async def get_option_chain(
             detail=f"No option data found for {index} expiry {expiry_date}",
         )
 
-    # Get spot price
-    spot_symbol = f"NSE:NIFTY 50" if index == "NIFTY" else f"NSE:NIFTY BANK"
+    # Get spot price using ltp() (works without paid Quote API)
+    spot_map = {"NIFTY": "NSE:NIFTY 50", "BANKNIFTY": "NSE:NIFTY BANK", "SENSEX": "BSE:SENSEX"}
+    spot_symbol = spot_map.get(index, "NSE:NIFTY 50")
     try:
-        spot_data = kite.quote([spot_symbol])
+        spot_data = kite.ltp([spot_symbol])
         spot_price = spot_data[spot_symbol]["last_price"] if spot_symbol in spot_data else 0
     except Exception as e:
         logger.warning("Failed to get spot price for %s: %s", spot_symbol, e)
@@ -317,7 +318,7 @@ async def get_option_chain(
     if not range_strikes:
         range_strikes = all_strikes[:30]
 
-    # Get live quotes in batches of 200
+    # Get live LTP in batches of 200 (uses ltp() which doesn't need paid Quote API)
     symbols_to_quote = []
     for strike in range_strikes:
         if strike in ce_instruments:
@@ -330,10 +331,10 @@ async def get_option_chain(
     for i in range(0, len(symbols_to_quote), batch_size):
         batch = symbols_to_quote[i : i + batch_size]
         try:
-            batch_quotes = kite.quote(batch)
-            quotes.update(batch_quotes)
+            batch_ltp = kite.ltp(batch)
+            quotes.update(batch_ltp)
         except Exception as e:
-            logger.error("Failed to fetch quotes batch: %s", e)
+            logger.error("Failed to fetch LTP batch: %s", e)
 
     # Build response
     strikes_data = []
@@ -345,32 +346,14 @@ async def get_option_chain(
             quote_key = f"NFO:{ce_sym}"
             entry.ce_symbol = ce_sym
             if quote_key in quotes:
-                q = quotes[quote_key]
-                entry.ce_ltp = q.get("last_price", 0) or 0
-                entry.ce_change = q.get("net_change", 0) or 0
-                entry.ce_oi = q.get("oi", 0) or 0
-                entry.ce_volume = q.get("volume", 0) or 0
-                depth = q.get("depth", {})
-                if depth.get("buy"):
-                    entry.ce_bid = depth["buy"][0].get("price", 0) or 0
-                if depth.get("sell"):
-                    entry.ce_ask = depth["sell"][0].get("price", 0) or 0
+                entry.ce_ltp = quotes[quote_key].get("last_price", 0) or 0
 
         if strike in pe_instruments:
             pe_sym = pe_instruments[strike]["tradingsymbol"]
             quote_key = f"NFO:{pe_sym}"
             entry.pe_symbol = pe_sym
             if quote_key in quotes:
-                q = quotes[quote_key]
-                entry.pe_ltp = q.get("last_price", 0) or 0
-                entry.pe_change = q.get("net_change", 0) or 0
-                entry.pe_oi = q.get("oi", 0) or 0
-                entry.pe_volume = q.get("volume", 0) or 0
-                depth = q.get("depth", {})
-                if depth.get("buy"):
-                    entry.pe_bid = depth["buy"][0].get("price", 0) or 0
-                if depth.get("sell"):
-                    entry.pe_ask = depth["sell"][0].get("price", 0) or 0
+                entry.pe_ltp = quotes[quote_key].get("last_price", 0) or 0
 
         strikes_data.append(entry)
 
@@ -386,6 +369,40 @@ async def get_option_chain(
     redis.set(cache_key, json.dumps(response.model_dump()), ttl=OPTION_CHAIN_TTL)
 
     return response
+
+
+# ---------------------------------------------------------------------------
+# GET /api/v1/instruments/expiries
+# ---------------------------------------------------------------------------
+
+
+@router.get("/expiries")
+async def get_expiries(
+    index: str = Query("NIFTY", description="Index: NIFTY, BANKNIFTY, or SENSEX"),
+    user_id: int = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    redis: RedisClient = Depends(get_redis),
+):
+    """Get available expiry dates for an index.
+
+    Returns sorted list of upcoming expiry dates.
+    """
+    access_token = _get_kite_access_token(db, user_id)
+    kite = _get_kite_client(access_token)
+
+    index = index.upper()
+    nfo_instruments = _get_nfo_instruments(kite, redis)
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    expiries = set()
+
+    for inst in nfo_instruments:
+        if inst["name"] == index and inst["instrument_type"] in ("CE", "PE"):
+            exp = inst["expiry"]
+            if exp and exp >= today:
+                expiries.add(exp)
+
+    return {"index": index, "expiries": sorted(expiries)[:12]}
 
 
 # ---------------------------------------------------------------------------

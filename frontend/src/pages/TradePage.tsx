@@ -7,7 +7,7 @@ import { TradeConfirmModal } from '../components/trade/TradeConfirmModal';
 import { GTTOrderForm } from '../components/trade/GTTOrderForm';
 import { DhanOrderForm } from '../components/trade/DhanOrderForm';
 import { post } from '../api/client';
-import { getOptionChain } from '../api/instruments';
+import { getOptionChain, getExpiries } from '../api/instruments';
 import type { OptionChainResponse } from '../api/types';
 
 type Side = 'BUY' | 'SELL';
@@ -384,6 +384,8 @@ function OptionChainTab({ onSelect, selectedIndex }: { onSelect: (symbol: string
   const [data, setData] = useState<OptionChainResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [expiries, setExpiries] = useState<string[]>([]);
+  const [selectedExpiry, setSelectedExpiry] = useState('nearest');
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Sync with parent selectedIndex
@@ -391,16 +393,26 @@ function OptionChainTab({ onSelect, selectedIndex }: { onSelect: (symbol: string
     setLocalIndex(selectedIndex);
   }, [selectedIndex]);
 
+  // Fetch expiries when index changes
+  useEffect(() => {
+    getExpiries(localIndex)
+      .then((res) => {
+        setExpiries(res.expiries || []);
+        setSelectedExpiry('nearest');
+      })
+      .catch(() => setExpiries([]));
+  }, [localIndex]);
+
   const fetchData = useCallback(async () => {
     try {
       setError(null);
-      const result = await getOptionChain(localIndex);
+      const result = await getOptionChain(localIndex, selectedExpiry);
       setData(result);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to load option chain';
       setError(message);
     }
-  }, [localIndex]);
+  }, [localIndex, selectedExpiry]);
 
   // Initial fetch
   useEffect(() => {
@@ -479,6 +491,23 @@ function OptionChainTab({ onSelect, selectedIndex }: { onSelect: (symbol: string
           </div>
         )}
       </div>
+
+      {/* Expiry Selector */}
+      {expiries.length > 0 && (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-dashboard-muted">Expiry:</span>
+          <select
+            value={selectedExpiry}
+            onChange={(e) => setSelectedExpiry(e.target.value)}
+            className="px-2 py-1 rounded bg-dashboard-bg border border-dashboard-border text-dashboard-text text-xs font-mono"
+          >
+            <option value="nearest">Nearest</option>
+            {expiries.map((exp) => (
+              <option key={exp} value={exp}>{exp}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Loading */}
       {loading && (

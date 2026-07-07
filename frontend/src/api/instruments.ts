@@ -12,6 +12,11 @@ export function getOptionChain(index: string, expiry: string = 'nearest'): Promi
   return get<OptionChainResponse>(`${INSTRUMENTS_BASE}/option-chain`, { index, expiry });
 }
 
+/** Get available expiry dates for an index. */
+export function getExpiries(index: string): Promise<{ index: string; expiries: string[] }> {
+  return get<{ index: string; expiries: string[] }>(`${INSTRUMENTS_BASE}/expiries`, { index });
+}
+
 /** Search instruments by name/symbol. */
 export function searchInstruments(query: string, exchange: string = 'NSE'): Promise<InstrumentSearchResult[]> {
   return get<InstrumentSearchResult[]>(`${INSTRUMENTS_BASE}/search`, { q: query, exchange });
