@@ -167,8 +167,8 @@ export function AIHelpButton({ context, data, className = '' }: AIHelpButtonProp
               {displayData.warnings && Array.isArray(displayData.warnings) && displayData.warnings.length > 0 && (
                 <div className="bg-loss/5 border border-loss/20 rounded-lg p-2">
                   <p className="text-[10px] uppercase text-loss font-bold mb-1">Warnings</p>
-                  {displayData.warnings.map((w: string, i: number) => (
-                    <p key={i} className="text-xs text-loss/80">• {w}</p>
+                  {(displayData.warnings as string[]).map((w: string, i: number) => (
+                    <p key={i} className="text-xs text-loss/80">• {String(w)}</p>
                   ))}
                 </div>
               )}
