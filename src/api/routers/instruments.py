@@ -225,6 +225,33 @@ def _find_nearest_expiry(instruments: list, index_name: str) -> str:
     return min(expiries)
 
 
+BFO_INSTRUMENTS_CACHE_KEY = "instruments:bfo:all"
+
+
+def _get_bfo_instruments(kite, redis: RedisClient) -> list:
+    """Get BFO (BSE F&O) instruments for SENSEX options, cached 24h."""
+    cached = redis.get(BFO_INSTRUMENTS_CACHE_KEY)
+    if cached:
+        return json.loads(cached)
+
+    instruments = kite.instruments("BFO")
+    data = []
+    for inst in instruments:
+        data.append({
+            "tradingsymbol": inst.get("tradingsymbol", ""),
+            "name": inst.get("name", ""),
+            "exchange": inst.get("exchange", "BFO"),
+            "instrument_type": inst.get("instrument_type", ""),
+            "strike": float(inst.get("strike", 0)),
+            "expiry": inst.get("expiry").strftime("%Y-%m-%d") if inst.get("expiry") else "",
+            "lot_size": int(inst.get("lot_size", 0)),
+            "instrument_token": inst.get("instrument_token", ""),
+            "segment": inst.get("segment", ""),
+        })
+
+    redis.set(BFO_INSTRUMENTS_CACHE_KEY, json.dumps(data), ttl=INSTRUMENTS_TTL)
+    return data
+
 # ---------------------------------------------------------------------------
 # GET /api/v1/instruments/option-chain
 # ---------------------------------------------------------------------------
@@ -259,12 +286,17 @@ async def get_option_chain(
     access_token = _get_kite_access_token(db, user_id)
     kite = _get_kite_client(access_token)
 
-    # Get instruments
-    nfo_instruments = _get_nfo_instruments(kite, redis)
+    # Get instruments (use BFO for SENSEX, NFO for others)
+    if index == "SENSEX":
+        instruments = _get_bfo_instruments(kite, redis)
+        exchange_prefix = "BFO"
+    else:
+        instruments = _get_nfo_instruments(kite, redis)
+        exchange_prefix = "NFO"
 
     # Determine expiry
     if expiry == "nearest":
-        expiry_date = _find_nearest_expiry(nfo_instruments, index)
+        expiry_date = _find_nearest_expiry(instruments, index)
     else:
         expiry_date = expiry
 
@@ -279,7 +311,7 @@ async def get_option_chain(
     pe_instruments = {}
     lot_size = 0
 
-    for inst in nfo_instruments:
+    for inst in instruments:
         if inst["name"] != index or inst["expiry"] != expiry_date:
             continue
         if inst["instrument_type"] == "CE":
@@ -322,9 +354,9 @@ async def get_option_chain(
     symbols_to_quote = []
     for strike in range_strikes:
         if strike in ce_instruments:
-            symbols_to_quote.append(f"NFO:{ce_instruments[strike]['tradingsymbol']}")
+            symbols_to_quote.append(f"{exchange_prefix}:{ce_instruments[strike]['tradingsymbol']}")
         if strike in pe_instruments:
-            symbols_to_quote.append(f"NFO:{pe_instruments[strike]['tradingsymbol']}")
+            symbols_to_quote.append(f"{exchange_prefix}:{pe_instruments[strike]['tradingsymbol']}")
 
     quotes = {}
     batch_size = 200
@@ -343,14 +375,14 @@ async def get_option_chain(
 
         if strike in ce_instruments:
             ce_sym = ce_instruments[strike]["tradingsymbol"]
-            quote_key = f"NFO:{ce_sym}"
+            quote_key = f"{exchange_prefix}:{ce_sym}"
             entry.ce_symbol = ce_sym
             if quote_key in quotes:
                 entry.ce_ltp = quotes[quote_key].get("last_price", 0) or 0
 
         if strike in pe_instruments:
             pe_sym = pe_instruments[strike]["tradingsymbol"]
-            quote_key = f"NFO:{pe_sym}"
+            quote_key = f"{exchange_prefix}:{pe_sym}"
             entry.pe_symbol = pe_sym
             if quote_key in quotes:
                 entry.pe_ltp = quotes[quote_key].get("last_price", 0) or 0
@@ -393,10 +425,16 @@ async def get_expiries(
     index = index.upper()
     nfo_instruments = _get_nfo_instruments(kite, redis)
 
+    # For SENSEX, use BFO instruments
+    if index == "SENSEX":
+        all_instruments = _get_bfo_instruments(kite, redis)
+    else:
+        all_instruments = nfo_instruments
+
     today = datetime.now().strftime("%Y-%m-%d")
     expiries = set()
 
-    for inst in nfo_instruments:
+    for inst in all_instruments:
         if inst["name"] == index and inst["instrument_type"] in ("CE", "PE"):
             exp = inst["expiry"]
             if exp and exp >= today:
