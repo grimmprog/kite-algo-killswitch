@@ -158,8 +158,8 @@ export function AIHelpButton({ context, data, className = '' }: AIHelpButtonProp
 
               {/* Fallback: show raw data keys if nothing else matched */}
               {!displayData.analysis && !displayData.recommendation && !displayData.explanation && !displayData.narrative && !displayData.message && (
-                <p className="text-sm text-dashboard-muted">
-                  {JSON.stringify(displayData.data || displayData, null, 2).slice(0, 500)}
+                <p className="text-sm text-dashboard-muted font-mono text-xs whitespace-pre-wrap">
+                  {JSON.stringify(response, null, 2).slice(0, 500)}
                 </p>
               )}
 
