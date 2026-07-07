@@ -76,6 +76,13 @@ export function AIHelpButton({ context, data, className = '' }: AIHelpButtonProp
     }
   };
 
+  // Unwrap nested response: API returns {success, data, message}
+  const displayData: AIResponse | null = response
+    ? (response.data && typeof response.data === 'object' && !Array.isArray(response.data)
+        ? { ...response, ...response.data as Record<string, unknown> }
+        : response)
+    : null;
+
   return (
     <div className={`relative inline-block ${className}`}>
       {/* AI Button */}
@@ -114,43 +121,53 @@ export function AIHelpButton({ context, data, className = '' }: AIHelpButtonProp
           )}
 
           {/* AI Response */}
-          {response && (
+          {displayData && (
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">AI Analysis</span>
-                {response.risk_level && (
+                {displayData.risk_level && (
                   <span className={`text-xs font-medium px-2 py-0.5 rounded ${
-                    response.risk_level === 'LOW' ? 'bg-profit/10 text-profit' :
-                    response.risk_level === 'HIGH' ? 'bg-loss/10 text-loss' :
+                    displayData.risk_level === 'LOW' || displayData.risk_level === 'low' ? 'bg-profit/10 text-profit' :
+                    displayData.risk_level === 'HIGH' || displayData.risk_level === 'high' ? 'bg-loss/10 text-loss' :
                     'bg-yellow-500/10 text-yellow-400'
-                  }`}>{response.risk_level}</span>
+                  }`}>{String(displayData.risk_level).toUpperCase()}</span>
                 )}
-                {response.confidence && (
+                {displayData.confidence && (
                   <span className="text-xs text-dashboard-muted">
-                    {response.confidence}% conf
+                    {displayData.confidence}% conf
                   </span>
                 )}
               </div>
 
-              {/* Main analysis text */}
-              {response.analysis && (
-                <p className="text-sm text-dashboard-text leading-relaxed">{response.analysis}</p>
+              {/* Main content — show whichever fields exist */}
+              {displayData.analysis && (
+                <p className="text-sm text-dashboard-text leading-relaxed">{String(displayData.analysis)}</p>
               )}
-              {response.recommendation && (
-                <p className="text-sm text-dashboard-text leading-relaxed">{response.recommendation}</p>
+              {displayData.recommendation && (
+                <p className="text-sm text-dashboard-text leading-relaxed">{String(displayData.recommendation)}</p>
               )}
-              {response.explanation && (
-                <p className="text-sm text-dashboard-text leading-relaxed">{response.explanation}</p>
+              {displayData.explanation && (
+                <p className="text-sm text-dashboard-text leading-relaxed">{String(displayData.explanation)}</p>
               )}
-              {response.narrative && (
-                <p className="text-sm text-dashboard-text leading-relaxed">{response.narrative}</p>
+              {displayData.narrative && (
+                <p className="text-sm text-dashboard-text leading-relaxed">{String(displayData.narrative)}</p>
+              )}
+              {displayData.message && !displayData.analysis && !displayData.recommendation && (
+                <p className="text-sm text-dashboard-text leading-relaxed">{String(displayData.message)}</p>
+              )}
+
+              {/* Fallback: show raw data keys if nothing else matched */}
+              {!displayData.analysis && !displayData.recommendation && !displayData.explanation && !displayData.narrative && !displayData.message && (
+                <p className="text-sm text-dashboard-muted">
+                  {JSON.stringify(displayData.data || displayData, null, 2).slice(0, 500)}
+                </p>
               )}
 
               {/* Warnings */}
-              {response.warnings && response.warnings.length > 0 && (
+              {displayData.warnings && Array.isArray(displayData.warnings) && displayData.warnings.length > 0 && (
                 <div className="bg-loss/5 border border-loss/20 rounded-lg p-2">
                   <p className="text-[10px] uppercase text-loss font-bold mb-1">Warnings</p>
-                  {response.warnings.map((w, i) => (
+                  {displayData.warnings.map((w: string, i: number) => (
                     <p key={i} className="text-xs text-loss/80">• {w}</p>
                   ))}
                 </div>
