@@ -8,8 +8,9 @@ import type { IndexMetrics, IndexRecommendation } from './types';
 const BASE = '/api/v1/analysis';
 
 /** Fetch index comparison data for SENSEX, NIFTY 50, and BANK NIFTY. */
-export function getIndices(): Promise<IndexMetrics[]> {
-  return get<IndexMetrics[]>(`${BASE}/indices`);
+export async function getIndices(): Promise<IndexMetrics[]> {
+  const response = await get<{ indices: IndexMetrics[]; count: number }>(`${BASE}/indices`);
+  return Array.isArray(response) ? response : (response.indices || []);
 }
 
 /** Get trade recommendation based on composite scores. */
