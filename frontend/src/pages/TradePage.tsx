@@ -16,9 +16,10 @@ type Exchange = 'NSE' | 'NFO' | 'BSE' | 'BFO';
 type TabId = 'option-chain' | 'quick-order' | 'gtt-order' | 'dhan-order';
 type IndexName = 'NIFTY' | 'BANKNIFTY' | 'SENSEX';
 
-// Index-specific lot sizes and exchanges
+// Index-specific lot sizes and exchanges (updated Jul 2026)
+// Note: Option chain fetches actual lot size from Kite instruments API
 const INDEX_CONFIG: Record<IndexName, { lotSize: number; exchange: Exchange; strikeStep: number }> = {
-  NIFTY: { lotSize: 75, exchange: 'NFO', strikeStep: 50 },
+  NIFTY: { lotSize: 65, exchange: 'NFO', strikeStep: 50 },
   BANKNIFTY: { lotSize: 30, exchange: 'NFO', strikeStep: 100 },
   SENSEX: { lotSize: 20, exchange: 'BFO', strikeStep: 100 },
 };
