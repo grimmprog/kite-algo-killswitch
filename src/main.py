@@ -154,18 +154,53 @@ async def oauth_callback_redirect(request_token: str = "", status_param: str = "
 <head><title>Kite OAuth Callback</title></head>
 <body>
 <p id="request_token" data-token="{request_token}">request_token={request_token}</p>
-<p>Redirecting...</p>
+<p>Connecting...</p>
 <script>
-    // For browser-based OAuth: redirect to frontend after a short delay
-    setTimeout(function() {{
-        window.location.href = "{frontend_url}/settings#brokers";
-    }}, 1000);
-    
-    // Notify parent window (popup flow)
-    if (window.opener) {{
-        window.opener.postMessage({{ type: 'kite_oauth_success', request_token: '{request_token}' }}, '*');
-        window.close();
-    }}
+    // Exchange the request_token via the authenticated API endpoint
+    (async function() {{
+        try {{
+            // Get JWT token from opener's localStorage
+            var token = '';
+            if (window.opener) {{
+                try {{
+                    token = window.opener.localStorage.getItem('kite_algo_token') || '';
+                }} catch(e) {{}}
+            }}
+            if (!token) {{
+                token = localStorage.getItem('kite_algo_token') || '';
+            }}
+            
+            if (token) {{
+                // Call the token exchange endpoint
+                var resp = await fetch('/api/v1/settings/brokers/kite/callback?request_token={request_token}', {{
+                    method: 'GET',
+                    headers: {{
+                        'Authorization': 'Bearer ' + token,
+                        'Content-Type': 'application/json'
+                    }}
+                }});
+                if (resp.ok) {{
+                    document.body.innerHTML = '<p style=\"color:green\">Connected successfully! Closing...</p>';
+                }} else {{
+                    var err = await resp.text();
+                    document.body.innerHTML = '<p style=\"color:red\">Failed: ' + err + '</p>';
+                }}
+            }} else {{
+                document.body.innerHTML = '<p style=\"color:orange\">No auth token found. Please close and try again.</p>';
+            }}
+        }} catch(e) {{
+            document.body.innerHTML = '<p style=\"color:red\">Error: ' + e.message + '</p>';
+        }}
+        
+        // Close popup after a short delay
+        setTimeout(function() {{
+            if (window.opener) {{
+                window.close();
+            }} else {{
+                window.location.href = "{frontend_url}/settings#brokers";
+            }}
+        }}, 1500);
+    }})();
 </script>
 </body>
 </html>"""
