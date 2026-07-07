@@ -74,4 +74,19 @@ celery_app.conf.beat_schedule = {
 }
 
 # Auto-discover tasks from workers package
+# Note: autodiscover_tasks looks for tasks.py files, but our workers use
+# different naming. We use include= to explicitly register task modules.
 celery_app.autodiscover_tasks(["src.workers"])
+celery_app.conf.include = [
+    "src.workers.market_data_task",
+    "src.workers.risk_engine_task",
+    "src.workers.execution_task",
+    "src.workers.scanner_worker",
+    "src.workers.signal_expiry_worker",
+    "src.workers.auto_monitor_task",
+    "src.workers.auto_login_worker",
+    "src.workers.ai_worker",
+    "src.workers.position_monitor_worker",
+    "src.workers.daily_pnl_worker",
+    "src.workers.price_action_worker",
+]
