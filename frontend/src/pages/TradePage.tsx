@@ -7,13 +7,21 @@ import { TradeConfirmModal } from '../components/trade/TradeConfirmModal';
 import { GTTOrderForm } from '../components/trade/GTTOrderForm';
 import { DhanOrderForm } from '../components/trade/DhanOrderForm';
 import { post } from '../api/client';
-import { getOptionChain, searchInstruments } from '../api/instruments';
-import type { OptionChainResponse, InstrumentSearchResult } from '../api/types';
+import { getOptionChain } from '../api/instruments';
+import type { OptionChainResponse } from '../api/types';
 
 type Side = 'BUY' | 'SELL';
 type OrderType = 'MARKET' | 'LIMIT';
 type Exchange = 'NSE' | 'NFO' | 'BSE' | 'BFO';
-type TabId = 'option-chain' | 'stock-search' | 'manual-order' | 'gtt-order' | 'dhan-order';
+type TabId = 'option-chain' | 'quick-order' | 'gtt-order' | 'dhan-order';
+type IndexName = 'NIFTY' | 'BANKNIFTY' | 'SENSEX';
+
+// Index-specific lot sizes and exchanges
+const INDEX_CONFIG: Record<IndexName, { lotSize: number; exchange: Exchange; strikeStep: number }> = {
+  NIFTY: { lotSize: 75, exchange: 'NFO', strikeStep: 50 },
+  BANKNIFTY: { lotSize: 30, exchange: 'NFO', strikeStep: 100 },
+  SENSEX: { lotSize: 20, exchange: 'BFO', strikeStep: 100 },
+};
 
 interface TradeForm {
   symbol: string;
@@ -34,10 +42,11 @@ interface TradeResult {
 export function TradePage() {
   const [activeTab, setActiveTab] = useState<TabId>('option-chain');
   const [activeBroker, setActiveBroker] = useState<'kite' | 'dhan'>('kite');
+  const [selectedIndex, setSelectedIndex] = useState<IndexName>('NIFTY');
   const [form, setForm] = useState<TradeForm>({
     symbol: '',
-    exchange: 'NSE',
-    quantity: '',
+    exchange: 'NFO',
+    quantity: '75',
     side: 'BUY',
     orderType: 'MARKET',
     price: '',
@@ -110,7 +119,7 @@ export function TradePage() {
     }
   };
 
-  // Pre-fill trade form from option chain or search
+  // Pre-fill trade form from option chain
   const prefillTrade = (symbol: string, exchange: Exchange, lotSize: number) => {
     setForm({
       symbol,
@@ -120,15 +129,25 @@ export function TradePage() {
       orderType: 'MARKET',
       price: '',
     });
-    setActiveTab('manual-order');
+    setActiveTab('quick-order');
     setError(null);
     setResult(null);
   };
 
+  // Update lot size when index changes
+  const handleIndexChange = (index: IndexName) => {
+    setSelectedIndex(index);
+    const config = INDEX_CONFIG[index];
+    setForm(prev => ({
+      ...prev,
+      exchange: config.exchange,
+      quantity: String(config.lotSize),
+    }));
+  };
+
   const tabs: { id: TabId; label: string }[] = [
     { id: 'option-chain', label: 'Option Chain' },
-    { id: 'stock-search', label: 'Stock Search' },
-    { id: 'manual-order', label: 'Manual Order' },
+    { id: 'quick-order', label: 'Quick Order' },
     { id: 'gtt-order', label: 'GTT (Kite)' },
     { id: 'dhan-order', label: 'Dhan + Trail SL' },
   ];
@@ -139,33 +158,52 @@ export function TradePage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h1 className="text-xl font-bold text-dashboard-text">Execute Trade</h1>
+            <h1 className="text-xl font-bold text-dashboard-text">Index Options Trading</h1>
             <p className="text-sm text-dashboard-muted mt-1">
-              Browse option chains, search stocks, or place manual orders
+              NIFTY · BANKNIFTY · SENSEX — Option chains, GTT orders, trailing SL
             </p>
           </div>
-          {/* Broker Toggle */}
-          <div className="flex items-center gap-1 bg-dashboard-card border border-dashboard-border rounded-lg p-1">
-            <button
-              onClick={() => setActiveBroker('kite')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                activeBroker === 'kite'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-dashboard-muted hover:text-dashboard-text'
-              }`}
-            >
-              Kite
-            </button>
-            <button
-              onClick={() => setActiveBroker('dhan')}
-              className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                activeBroker === 'dhan'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-dashboard-muted hover:text-dashboard-text'
-              }`}
-            >
-              Dhan
-            </button>
+          {/* Index + Broker Toggle */}
+          <div className="flex items-center gap-3">
+            {/* Index Selector */}
+            <div className="flex items-center gap-1 bg-dashboard-card border border-dashboard-border rounded-lg p-1">
+              {(Object.keys(INDEX_CONFIG) as IndexName[]).map((idx) => (
+                <button
+                  key={idx}
+                  onClick={() => handleIndexChange(idx)}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-md transition-colors ${
+                    selectedIndex === idx
+                      ? 'bg-purple-600 text-white'
+                      : 'text-dashboard-muted hover:text-dashboard-text'
+                  }`}
+                >
+                  {idx === 'BANKNIFTY' ? 'BNIFTY' : idx}
+                </button>
+              ))}
+            </div>
+            {/* Broker Toggle */}
+            <div className="flex items-center gap-1 bg-dashboard-card border border-dashboard-border rounded-lg p-1">
+              <button
+                onClick={() => setActiveBroker('kite')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  activeBroker === 'kite'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-dashboard-muted hover:text-dashboard-text'
+                }`}
+              >
+                Kite
+              </button>
+              <button
+                onClick={() => setActiveBroker('dhan')}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  activeBroker === 'dhan'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-dashboard-muted hover:text-dashboard-text'
+                }`}
+              >
+                Dhan
+              </button>
+            </div>
           </div>
         </div>
 
@@ -188,15 +226,21 @@ export function TradePage() {
 
         {/* Tab Content */}
         {activeTab === 'option-chain' && (
-          <OptionChainTab onSelect={prefillTrade} />
+          <OptionChainTab onSelect={prefillTrade} selectedIndex={selectedIndex} />
         )}
 
-        {activeTab === 'stock-search' && (
-          <StockSearchTab onSelect={prefillTrade} />
-        )}
-
-        {activeTab === 'manual-order' && (
+        {activeTab === 'quick-order' && (
           <div className="max-w-2xl mx-auto space-y-6">
+            {/* Index info badge */}
+            <div className="flex items-center gap-3 bg-dashboard-card border border-dashboard-border rounded-lg p-3">
+              <span className="text-xs font-bold text-purple-400 bg-purple-500/10 px-2 py-1 rounded">
+                {selectedIndex}
+              </span>
+              <span className="text-xs text-dashboard-muted">
+                Lot: {INDEX_CONFIG[selectedIndex].lotSize} · Exchange: {INDEX_CONFIG[selectedIndex].exchange} · Strike step: {INDEX_CONFIG[selectedIndex].strikeStep}
+              </span>
+            </div>
+
             {/* Success result */}
             {result && result.status === 'success' && (
               <div className="bg-profit/10 border border-profit/30 rounded-lg p-4" role="alert">
@@ -204,123 +248,94 @@ export function TradePage() {
                 {result.order_id && (
                   <p className="text-xs text-dashboard-muted mt-1">Order ID: {result.order_id}</p>
                 )}
-                <p className="text-xs text-dashboard-muted mt-0.5">{result.message}</p>
               </div>
             )}
 
-            {/* Error */}
             {error && (
               <div className="bg-loss/10 border border-loss/30 rounded-lg p-3 text-sm text-loss" role="alert">
                 {error}
               </div>
             )}
 
-            {/* Trade Form */}
-            <Card title="Trade Details" padding="lg">
+            {/* Quick Order Form — optimized for index options */}
+            <Card title="Quick Order" padding="lg">
               <div className="space-y-4">
                 <Input
                   label="Symbol"
-                  placeholder="e.g. NIFTY24DEC19000CE"
+                  placeholder={`e.g. ${selectedIndex === 'BANKNIFTY' ? 'BANKNIFTY2470952000CE' : selectedIndex + '2470924400CE'}`}
                   value={form.symbol}
                   onChange={(e) => handleChange('symbol', e.target.value)}
                 />
 
-                <div>
-                  <label htmlFor="exchange" className="block text-sm font-medium text-dashboard-text mb-1.5">
-                    Exchange
-                  </label>
-                  <select
-                    id="exchange"
-                    value={form.exchange}
-                    onChange={(e) => handleChange('exchange', e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-dashboard-bg border border-dashboard-border text-dashboard-text text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="NSE">NSE</option>
-                    <option value="NFO">NFO</option>
-                    <option value="BSE">BSE</option>
-                    <option value="BFO">BFO</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-dashboard-text mb-1.5">Side</label>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => handleChange('side', 'BUY')}
-                      className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                        form.side === 'BUY'
-                          ? 'bg-profit text-white'
-                          : 'bg-dashboard-bg border border-dashboard-border text-dashboard-muted hover:text-dashboard-text'
-                      }`}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-dashboard-text mb-1.5">Exchange</label>
+                    <select
+                      value={form.exchange}
+                      onChange={(e) => handleChange('exchange', e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg bg-dashboard-bg border border-dashboard-border text-dashboard-text text-sm font-mono"
                     >
-                      BUY
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleChange('side', 'SELL')}
-                      className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                        form.side === 'SELL'
-                          ? 'bg-loss text-white'
-                          : 'bg-dashboard-bg border border-dashboard-border text-dashboard-muted hover:text-dashboard-text'
-                      }`}
-                    >
-                      SELL
-                    </button>
+                      <option value="NFO">NFO</option>
+                      <option value="BFO">BFO</option>
+                      <option value="NSE">NSE</option>
+                    </select>
                   </div>
-                </div>
-
-                <Input
-                  label="Quantity"
-                  type="number"
-                  placeholder="e.g. 50"
-                  min="1"
-                  step="1"
-                  value={form.quantity}
-                  onChange={(e) => handleChange('quantity', e.target.value)}
-                />
-
-                <div>
-                  <label htmlFor="order-type" className="block text-sm font-medium text-dashboard-text mb-1.5">
-                    Order Type
-                  </label>
-                  <select
-                    id="order-type"
-                    value={form.orderType}
-                    onChange={(e) => handleChange('orderType', e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-dashboard-bg border border-dashboard-border text-dashboard-text text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="MARKET">MARKET</option>
-                    <option value="LIMIT">LIMIT</option>
-                  </select>
-                </div>
-
-                {form.orderType === 'LIMIT' && (
                   <Input
-                    label="Price"
+                    label="Lots"
                     type="number"
-                    placeholder="Enter limit price"
-                    min="0.01"
-                    step="0.05"
-                    value={form.price}
-                    onChange={(e) => handleChange('price', e.target.value)}
+                    min="1"
+                    value={String(Math.round(Number(form.quantity) / INDEX_CONFIG[selectedIndex].lotSize) || 1)}
+                    onChange={(e) => handleChange('quantity', String(Number(e.target.value) * INDEX_CONFIG[selectedIndex].lotSize))}
                   />
-                )}
+                </div>
 
-                <Button variant="primary" size="lg" className="w-full mt-4" onClick={handleSubmit}>
-                  Review & Execute
+                <div className="text-xs text-dashboard-muted">
+                  Quantity: <span className="font-mono font-medium text-dashboard-text">{form.quantity}</span> ({Math.round(Number(form.quantity) / INDEX_CONFIG[selectedIndex].lotSize)} lot × {INDEX_CONFIG[selectedIndex].lotSize})
+                </div>
+
+                {/* Side — large buttons */}
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => handleChange('side', 'BUY')}
+                    className={`flex-1 py-3 rounded-lg text-sm font-bold transition-colors ${
+                      form.side === 'BUY'
+                        ? 'bg-profit text-white shadow-lg shadow-profit/20'
+                        : 'bg-dashboard-bg border border-dashboard-border text-dashboard-muted'
+                    }`}
+                  >BUY</button>
+                  <button
+                    onClick={() => handleChange('side', 'SELL')}
+                    className={`flex-1 py-3 rounded-lg text-sm font-bold transition-colors ${
+                      form.side === 'SELL'
+                        ? 'bg-loss text-white shadow-lg shadow-loss/20'
+                        : 'bg-dashboard-bg border border-dashboard-border text-dashboard-muted'
+                    }`}
+                  >SELL</button>
+                </div>
+
+                {/* Order type */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-dashboard-text mb-1.5">Type</label>
+                    <select
+                      value={form.orderType}
+                      onChange={(e) => handleChange('orderType', e.target.value)}
+                      className="w-full px-3 py-2 rounded-lg bg-dashboard-bg border border-dashboard-border text-dashboard-text text-sm font-mono"
+                    >
+                      <option value="MARKET">MARKET</option>
+                      <option value="LIMIT">LIMIT</option>
+                    </select>
+                  </div>
+                  {form.orderType === 'LIMIT' && (
+                    <Input label="Price" type="number" step="0.05" value={form.price} onChange={(e) => handleChange('price', e.target.value)} />
+                  )}
+                </div>
+
+                <Button variant="primary" size="lg" className="w-full mt-2" onClick={handleSubmit}>
+                  Review & Execute ({activeBroker.toUpperCase()})
                 </Button>
               </div>
             </Card>
-
-            {/* Risk Disclosure */}
-            <div className="bg-dashboard-bg border border-dashboard-border rounded-lg p-4">
-              <p className="text-xs text-dashboard-muted leading-relaxed">
-                <strong className="text-dashboard-text">Risk Disclosure:</strong> Trading in derivatives involves
-                substantial risk of loss. This platform is an execution tool and does not provide investment advice.
-                All trades require your manual confirmation.
-              </p>
-            </div>
           </div>
         )}
 
@@ -364,23 +379,28 @@ export function TradePage() {
 // Option Chain Tab
 // ===========================================================================
 
-function OptionChainTab({ onSelect }: { onSelect: (symbol: string, exchange: Exchange, lotSize: number) => void }) {
-  const [selectedIndex, setSelectedIndex] = useState<'NIFTY' | 'BANKNIFTY'>('NIFTY');
+function OptionChainTab({ onSelect, selectedIndex }: { onSelect: (symbol: string, exchange: Exchange, lotSize: number) => void; selectedIndex: IndexName }) {
+  const [localIndex, setLocalIndex] = useState<IndexName>(selectedIndex);
   const [data, setData] = useState<OptionChainResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Sync with parent selectedIndex
+  useEffect(() => {
+    setLocalIndex(selectedIndex);
+  }, [selectedIndex]);
+
   const fetchData = useCallback(async () => {
     try {
       setError(null);
-      const result = await getOptionChain(selectedIndex);
+      const result = await getOptionChain(localIndex);
       setData(result);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to load option chain';
       setError(message);
     }
-  }, [selectedIndex]);
+  }, [localIndex]);
 
   // Initial fetch
   useEffect(() => {
@@ -415,7 +435,8 @@ function OptionChainTab({ onSelect }: { onSelect: (symbol: string, exchange: Exc
 
   const handleCellClick = (symbol: string, lotSize: number) => {
     if (symbol) {
-      onSelect(symbol, 'NFO', lotSize);
+      const exchange = localIndex === 'SENSEX' ? 'BFO' : 'NFO';
+      onSelect(symbol, exchange as Exchange, lotSize);
     }
   };
 
@@ -432,17 +453,17 @@ function OptionChainTab({ onSelect }: { onSelect: (symbol: string, exchange: Exc
       {/* Controls */}
       <div className="flex items-center justify-between">
         <div className="flex gap-2">
-          {(['NIFTY', 'BANKNIFTY'] as const).map((idx) => (
+          {(['NIFTY', 'BANKNIFTY', 'SENSEX'] as const).map((idx) => (
             <button
               key={idx}
-              onClick={() => setSelectedIndex(idx)}
+              onClick={() => setLocalIndex(idx)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                selectedIndex === idx
-                  ? 'bg-blue-600 text-white'
+                localIndex === idx
+                  ? 'bg-purple-600 text-white'
                   : 'bg-dashboard-card border border-dashboard-border text-dashboard-muted hover:text-dashboard-text'
               }`}
             >
-              {idx}
+              {idx === 'BANKNIFTY' ? 'BANK NIFTY' : idx}
             </button>
           ))}
         </div>
@@ -563,163 +584,8 @@ function OptionChainTab({ onSelect }: { onSelect: (symbol: string, exchange: Exc
 
       {/* Legend */}
       <p className="text-xs text-dashboard-muted">
-        Click on any LTP value to pre-fill the trade form. OI and Volume shown in thousands.
+        Click on any LTP to pre-fill the Quick Order form. OI and Volume in thousands. Lot size: {data?.lot_size || INDEX_CONFIG[localIndex].lotSize}
       </p>
-    </div>
-  );
-}
-
-// ===========================================================================
-// Stock Search Tab
-// ===========================================================================
-
-function StockSearchTab({ onSelect }: { onSelect: (symbol: string, exchange: Exchange, lotSize: number) => void }) {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState<InstrumentSearchResult[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const handleSearch = useCallback(async (searchQuery: string) => {
-    if (searchQuery.length < 2) {
-      setResults([]);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await searchInstruments(searchQuery, 'NSE');
-      setResults(data);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Search failed';
-      setError(message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const handleInputChange = (value: string) => {
-    setQuery(value);
-
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current);
-    }
-
-    debounceRef.current = setTimeout(() => {
-      handleSearch(value.trim());
-    }, 300);
-  };
-
-  // Cleanup debounce on unmount
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-  }, []);
-
-  const handleSelect = (result: InstrumentSearchResult) => {
-    const exchange = (result.exchange || 'NSE') as Exchange;
-    const lotSize = result.lot_size || 1;
-    onSelect(result.tradingsymbol, exchange, lotSize);
-  };
-
-  return (
-    <div className="max-w-2xl mx-auto space-y-4">
-      <Card title="Search Instruments" padding="lg">
-        <div className="space-y-4">
-          <Input
-            label="Search"
-            placeholder="Type stock name or symbol (e.g. RELIANCE, TCS, INFY)"
-            value={query}
-            onChange={(e) => handleInputChange(e.target.value)}
-          />
-
-          {/* Loading */}
-          {loading && (
-            <div className="flex items-center gap-2 text-sm text-dashboard-muted">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500" />
-              Searching...
-            </div>
-          )}
-
-          {/* Error */}
-          {error && (
-            <div className="text-sm text-loss">{error}</div>
-          )}
-
-          {/* Results */}
-          {results.length > 0 && (
-            <div className="border border-dashboard-border rounded-lg overflow-hidden">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-dashboard-bg border-b border-dashboard-border text-dashboard-muted text-xs">
-                    <th className="py-2 px-3 text-left">Symbol</th>
-                    <th className="py-2 px-3 text-left">Name</th>
-                    <th className="py-2 px-3 text-left">Exchange</th>
-                    <th className="py-2 px-3 text-right">LTP</th>
-                    <th className="py-2 px-3 text-right">Change %</th>
-                    <th className="py-2 px-3 text-center">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {results.map((r) => (
-                    <tr
-                      key={`${r.exchange}:${r.tradingsymbol}`}
-                      className="border-b border-dashboard-border/50 hover:bg-dashboard-bg/50 cursor-pointer"
-                      onClick={() => handleSelect(r)}
-                    >
-                      <td className="py-2 px-3 font-mono font-medium text-dashboard-text">
-                        {r.tradingsymbol}
-                      </td>
-                      <td className="py-2 px-3 text-dashboard-muted truncate max-w-[200px]">
-                        {r.name}
-                      </td>
-                      <td className="py-2 px-3 text-dashboard-muted">
-                        {r.exchange}
-                      </td>
-                      <td className="py-2 px-3 text-right font-mono text-dashboard-text">
-                        {r.last_price ? `₹${r.last_price.toLocaleString('en-IN')}` : '-'}
-                      </td>
-                      <td className={`py-2 px-3 text-right font-mono ${
-                        r.change_percent > 0 ? 'text-profit' : r.change_percent < 0 ? 'text-loss' : 'text-dashboard-muted'
-                      }`}>
-                        {r.change_percent ? `${r.change_percent > 0 ? '+' : ''}${r.change_percent.toFixed(2)}%` : '-'}
-                      </td>
-                      <td className="py-2 px-3 text-center">
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSelect(r);
-                          }}
-                          className="px-2 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                        >
-                          Trade
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {/* Empty state */}
-          {query.length >= 2 && !loading && results.length === 0 && !error && (
-            <p className="text-sm text-dashboard-muted text-center py-4">
-              No instruments found for "{query}"
-            </p>
-          )}
-
-          {query.length < 2 && (
-            <p className="text-sm text-dashboard-muted text-center py-4">
-              Type at least 2 characters to search
-            </p>
-          )}
-        </div>
-      </Card>
     </div>
   );
 }
