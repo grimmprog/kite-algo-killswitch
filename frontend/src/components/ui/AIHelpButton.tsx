@@ -45,18 +45,17 @@ export function AIHelpButton({ context, data, className = '' }: AIHelpButtonProp
 
       switch (context) {
         case 'position':
-          result = await post<AIResponse>('/api/v1/ai/exit-recommendation', {
-            position_data: data,
-          });
+          result = await get<AIResponse>('/api/v1/ai/risk-warnings');
           break;
         case 'trade':
           result = await post<AIResponse>('/api/v1/ai/entry-suggestion', {
-            trade_context: data,
+            signal_context: data || { symbol: 'NIFTY', action: 'entry' },
+            market_data: { bid: 0, ask: 0, vwap: 0 },
           });
           break;
         case 'scanner':
           result = await post<AIResponse>('/api/v1/ai/analyze-signal', {
-            signal_context: data,
+            signal_context: data || { symbol: 'NIFTY', scan_type: 'trend_pullback' },
           });
           break;
         case 'analysis':
@@ -64,7 +63,7 @@ export function AIHelpButton({ context, data, className = '' }: AIHelpButtonProp
           break;
         case 'general':
         default:
-          result = await get<AIResponse>('/api/v1/ai/risk-warnings');
+          result = await get<AIResponse>('/api/v1/ai/risk-score');
           break;
       }
 
