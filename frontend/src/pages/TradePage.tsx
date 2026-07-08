@@ -95,8 +95,7 @@ export function TradePage() {
         quantity: Number(form.quantity),
         side: form.side,
         order_type: form.orderType,
-        price: form.orderType === 'LIMIT' ? Number(form.price) : 0,
-        broker: activeBroker,
+        price: form.orderType === 'LIMIT' ? Number(form.price) : null,
         risk_snapshot: {},
       };
 
