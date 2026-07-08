@@ -257,7 +257,9 @@ class AIProviderClient:
 
 
 class GeminiClient(AIProviderClient):
-    """Google Gemini API client."""
+    """Google Gemini API client using REST API."""
+
+    GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
     def send_request(
         self, prompt: str, context: Dict[str, Any], timeout: float = 5.0
@@ -275,12 +277,89 @@ class GeminiClient(AIProviderClient):
         Raises:
             AIProviderError: On API errors or timeouts.
         """
-        # Implementation will be added in subsequent tasks (7.3+)
-        raise NotImplementedError("Gemini client implementation pending")
+        import json
+        import requests as http_requests
+
+        url = f"{self.GEMINI_API_URL}?key={self.api_key}"
+
+        # Build the combined prompt with context
+        full_prompt = f"{prompt}\n\nContext data:\n{json.dumps(context, indent=2, default=str)}"
+
+        payload = {
+            "contents": [
+                {
+                    "parts": [
+                        {"text": full_prompt}
+                    ]
+                }
+            ],
+            "generationConfig": {
+                "temperature": 0.3,
+                "maxOutputTokens": 1024,
+                "responseMimeType": "application/json",
+            },
+        }
+
+        try:
+            resp = http_requests.post(
+                url,
+                json=payload,
+                timeout=timeout,
+                headers={"Content-Type": "application/json"},
+            )
+        except http_requests.exceptions.Timeout:
+            raise TimeoutError(f"Gemini API timed out after {timeout}s")
+        except http_requests.exceptions.RequestException as e:
+            raise AIProviderError(f"Gemini API request failed: {e}")
+
+        if resp.status_code != 200:
+            raise AIProviderError(
+                f"Gemini API returned {resp.status_code}: {resp.text[:300]}"
+            )
+
+        try:
+            data = resp.json()
+        except (json.JSONDecodeError, ValueError):
+            raise AIProviderError("Failed to parse Gemini API response as JSON")
+
+        # Extract text content from Gemini response structure
+        try:
+            candidates = data.get("candidates", [])
+            if not candidates:
+                raise AIProviderError("Gemini returned no candidates")
+
+            content = candidates[0].get("content", {})
+            parts = content.get("parts", [])
+            if not parts:
+                raise AIProviderError("Gemini returned no content parts")
+
+            text = parts[0].get("text", "")
+        except (IndexError, KeyError, TypeError) as e:
+            raise AIProviderError(f"Unexpected Gemini response structure: {e}")
+
+        # Parse the response text as JSON
+        try:
+            # Strip markdown code fences if present
+            cleaned = text.strip()
+            if cleaned.startswith("```json"):
+                cleaned = cleaned[7:]
+            if cleaned.startswith("```"):
+                cleaned = cleaned[3:]
+            if cleaned.endswith("```"):
+                cleaned = cleaned[:-3]
+            cleaned = cleaned.strip()
+
+            result = json.loads(cleaned)
+            return result if isinstance(result, dict) else {"data": result}
+        except (json.JSONDecodeError, ValueError):
+            # If not valid JSON, return as text in a dict
+            return {"analysis": text, "raw_response": True}
 
 
 class ClaudeClient(AIProviderClient):
     """Anthropic Claude API client."""
+
+    CLAUDE_API_URL = "https://api.anthropic.com/v1/messages"
 
     def send_request(
         self, prompt: str, context: Dict[str, Any], timeout: float = 5.0
@@ -298,8 +377,72 @@ class ClaudeClient(AIProviderClient):
         Raises:
             AIProviderError: On API errors or timeouts.
         """
-        # Implementation will be added in subsequent tasks (7.3+)
-        raise NotImplementedError("Claude client implementation pending")
+        import json
+        import requests as http_requests
+
+        full_prompt = f"{prompt}\n\nContext data:\n{json.dumps(context, indent=2, default=str)}"
+
+        payload = {
+            "model": "claude-sonnet-4-20250514",
+            "max_tokens": 1024,
+            "messages": [
+                {"role": "user", "content": full_prompt}
+            ],
+        }
+
+        headers = {
+            "Content-Type": "application/json",
+            "x-api-key": self.api_key,
+            "anthropic-version": "2023-06-01",
+        }
+
+        try:
+            resp = http_requests.post(
+                self.CLAUDE_API_URL,
+                json=payload,
+                timeout=timeout,
+                headers=headers,
+            )
+        except http_requests.exceptions.Timeout:
+            raise TimeoutError(f"Claude API timed out after {timeout}s")
+        except http_requests.exceptions.RequestException as e:
+            raise AIProviderError(f"Claude API request failed: {e}")
+
+        if resp.status_code != 200:
+            raise AIProviderError(
+                f"Claude API returned {resp.status_code}: {resp.text[:300]}"
+            )
+
+        try:
+            data = resp.json()
+        except (json.JSONDecodeError, ValueError):
+            raise AIProviderError("Failed to parse Claude API response as JSON")
+
+        # Extract text from Claude response
+        try:
+            content_blocks = data.get("content", [])
+            if not content_blocks:
+                raise AIProviderError("Claude returned no content")
+
+            text = content_blocks[0].get("text", "")
+        except (IndexError, KeyError, TypeError) as e:
+            raise AIProviderError(f"Unexpected Claude response structure: {e}")
+
+        # Parse the response text as JSON
+        try:
+            cleaned = text.strip()
+            if cleaned.startswith("```json"):
+                cleaned = cleaned[7:]
+            if cleaned.startswith("```"):
+                cleaned = cleaned[3:]
+            if cleaned.endswith("```"):
+                cleaned = cleaned[:-3]
+            cleaned = cleaned.strip()
+
+            result = json.loads(cleaned)
+            return result if isinstance(result, dict) else {"data": result}
+        except (json.JSONDecodeError, ValueError):
+            return {"analysis": text, "raw_response": True}
 
 
 class AIProviderError(Exception):
@@ -442,7 +585,7 @@ class AITradingService:
     """
 
     # Default timeout for AI API requests (seconds)
-    DEFAULT_TIMEOUT: float = 5.0
+    DEFAULT_TIMEOUT: float = 10.0
 
     def __init__(self, provider: AIProvider, api_key: str) -> None:
         """Initialize AITradingService.

@@ -123,7 +123,8 @@ def _get_ai_service(
 ) -> Optional[AITradingService]:
     """Build an AITradingService from user's AI settings.
 
-    Returns None if AI is not configured (no provider or key).
+    Returns None if AI is not configured (no API key available).
+    Falls back to defaults if user has no settings row.
     """
     settings = (
         db.query(UserSettings)
@@ -131,14 +132,16 @@ def _get_ai_service(
         .first()
     )
 
-    if not settings:
-        return None
+    # Determine provider from settings or default to gemini
+    provider_str = "gemini"
+    if settings and settings.ai_provider:
+        provider_str = settings.ai_provider
 
-    provider_str = settings.ai_provider or "gemini"
     try:
         provider = AIProvider(provider_str)
     except ValueError:
         provider = AIProvider.GEMINI
+        provider_str = "gemini"
 
     # API key comes from environment (keyed by provider)
     import os
@@ -147,6 +150,15 @@ def _get_ai_service(
     if not api_key:
         # Fallback to generic key
         api_key = os.environ.get("AI_API_KEY", "")
+
+    if not api_key:
+        # Try the other provider as last resort
+        for fallback_provider in ["gemini", "claude"]:
+            api_key = os.environ.get(f"AI_{fallback_provider.upper()}_API_KEY", "")
+            if api_key:
+                provider_str = fallback_provider
+                provider = AIProvider(fallback_provider)
+                break
 
     if not api_key:
         return None
