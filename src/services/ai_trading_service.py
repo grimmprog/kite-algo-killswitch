@@ -259,7 +259,7 @@ class AIProviderClient:
 class GeminiClient(AIProviderClient):
     """Google Gemini API client using REST API."""
 
-    GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
+    GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
 
     def send_request(
         self, prompt: str, context: Dict[str, Any], timeout: float = 5.0
@@ -685,7 +685,7 @@ class AITradingService:
             )
             return {
                 "error": True,
-                "message": "AI analysis unavailable",
+                "message": f"AI analysis unavailable: {str(e)[:100]}",
                 "available": False,
             }
         except TimeoutError:
@@ -696,7 +696,7 @@ class AITradingService:
             )
             return {
                 "error": True,
-                "message": "AI analysis unavailable",
+                "message": f"AI analysis timed out after {effective_timeout}s",
                 "available": False,
             }
         except Exception as e:
@@ -709,7 +709,7 @@ class AITradingService:
             )
             return {
                 "error": True,
-                "message": "AI analysis unavailable",
+                "message": f"AI analysis unavailable: {type(e).__name__}: {str(e)[:100]}",
                 "available": False,
             }
 
@@ -789,7 +789,7 @@ class AITradingService:
         return self._make_request(
             prompt=prompt,
             context=signal_context,
-            timeout=5.0,
+            timeout=15.0,
         )
 
     def suggest_entry(
@@ -863,7 +863,7 @@ class AITradingService:
         response = self._make_request(
             prompt=prompt,
             context=combined_context,
-            timeout=5.0,
+            timeout=15.0,
         )
 
         # If the request failed (graceful degradation), return the error response

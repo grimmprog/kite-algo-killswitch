@@ -203,7 +203,7 @@ async def analyze_signal(
         result = ai_service.analyze_signal(request.signal_context)
     except Exception as e:
         logger.error("AI analyze_signal error for user %d: %s", user_id, str(e))
-        return _ai_unavailable_response()
+        return _ai_unavailable_response(f"AI error: {type(e).__name__}: {str(e)[:100]}")
 
     # Check for graceful degradation from the service itself
     if isinstance(result, dict) and result.get("error"):
@@ -250,7 +250,7 @@ async def entry_suggestion(
         )
     except Exception as e:
         logger.error("AI suggest_entry error for user %d: %s", user_id, str(e))
-        return _ai_unavailable_response()
+        return _ai_unavailable_response(f"AI error: {type(e).__name__}: {str(e)[:100]}")
 
     if isinstance(result, dict) and result.get("error"):
         return AIAnalysisResponse(
@@ -298,7 +298,7 @@ async def consolidation_analysis(
         logger.error(
             "AI analyze_consolidation error for user %d: %s", user_id, str(e)
         )
-        return _ai_unavailable_response()
+        return _ai_unavailable_response(f"AI error: {type(e).__name__}: {str(e)[:100]}")
 
     if isinstance(result, dict) and result.get("error"):
         return AIAnalysisResponse(
@@ -381,7 +381,7 @@ async def get_exit_recommendation(
             position_id,
             str(e),
         )
-        return _ai_unavailable_response()
+        return _ai_unavailable_response(f"AI error: {type(e).__name__}: {str(e)[:100]}")
 
     if isinstance(result, dict) and result.get("error"):
         return AIAnalysisResponse(
@@ -476,7 +476,7 @@ async def get_market_narrative(
         logger.error(
             "AI generate_narrative error for user %d: %s", user_id, str(e)
         )
-        return _ai_unavailable_response()
+        return _ai_unavailable_response(f"AI error: {type(e).__name__}: {str(e)[:100]}")
 
     if isinstance(result, dict) and result.get("error"):
         return AIAnalysisResponse(
@@ -526,7 +526,7 @@ async def review_trade(
         result = ai_service.review_trade(request.trade, request.market_history)
     except Exception as e:
         logger.error("AI review_trade error for user %d: %s", user_id, str(e))
-        return _ai_unavailable_response()
+        return _ai_unavailable_response(f"AI error: {type(e).__name__}: {str(e)[:100]}")
 
     if isinstance(result, dict) and result.get("error"):
         return AIAnalysisResponse(
@@ -592,7 +592,7 @@ async def get_risk_warnings(
         logger.error(
             "AI detect_risk_anomalies error for user %d: %s", user_id, str(e)
         )
-        return _ai_unavailable_response()
+        return _ai_unavailable_response(f"AI error: {type(e).__name__}: {str(e)[:100]}")
 
     if isinstance(result, dict) and result.get("error"):
         return AIAnalysisResponse(

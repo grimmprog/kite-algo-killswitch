@@ -17,9 +17,19 @@ interface AIResponse {
   risk_level?: string;
   confidence?: number;
   explanation?: string;
-  warnings?: string[];
+  warnings?: unknown[];
   narrative?: string;
   message?: string;
+  quality_rating?: string;
+  bias?: string;
+  key_points?: string[];
+  detailed_analysis?: string;
+  reasoning?: string;
+  timing_recommendation?: string;
+  suggested_entry?: number;
+  suggested_sl?: number;
+  warning_count?: number;
+  has_critical?: boolean;
 }
 
 /**
@@ -134,6 +144,20 @@ export function AIHelpButton({ context, data, className = '' }: AIHelpButtonProp
                     'bg-yellow-500/10 text-yellow-400'
                   }`}>{String(displayData.risk_level).toUpperCase()}</span>
                 )}
+                {displayData.quality_rating && (
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded ${
+                    String(displayData.quality_rating).includes('Strong') ? 'bg-profit/10 text-profit' :
+                    String(displayData.quality_rating).includes('Avoid') ? 'bg-loss/10 text-loss' :
+                    'bg-yellow-500/10 text-yellow-400'
+                  }`}>{String(displayData.quality_rating)}</span>
+                )}
+                {displayData.bias && (
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded ${
+                    displayData.bias === 'bullish' ? 'bg-profit/10 text-profit' :
+                    displayData.bias === 'bearish' ? 'bg-loss/10 text-loss' :
+                    'bg-yellow-500/10 text-yellow-400'
+                  }`}>{String(displayData.bias).toUpperCase()}</span>
+                )}
                 {displayData.confidence && (
                   <span className="text-xs text-dashboard-muted">
                     {displayData.confidence}% conf
@@ -141,36 +165,83 @@ export function AIHelpButton({ context, data, className = '' }: AIHelpButtonProp
                 )}
               </div>
 
-              {/* Main content — show whichever fields exist */}
+              {/* Signal analysis: explanation field */}
+              {displayData.explanation && (
+                <p className="text-sm text-dashboard-text leading-relaxed">{String(displayData.explanation)}</p>
+              )}
+
+              {/* Entry suggestion: reasoning + timing */}
+              {displayData.reasoning && (
+                <p className="text-sm text-dashboard-text leading-relaxed">{String(displayData.reasoning)}</p>
+              )}
+              {displayData.timing_recommendation && (
+                <p className="text-sm font-medium text-blue-400 mt-1">
+                  {'⏱ '}{String(displayData.timing_recommendation)}
+                </p>
+              )}
+              {displayData.suggested_entry && (
+                <div className="flex gap-3 text-xs mt-1">
+                  <span className="text-dashboard-muted">{'Entry: '}<span className="text-dashboard-text font-mono">{'₹'}{String(displayData.suggested_entry)}</span></span>
+                  {displayData.suggested_sl && (
+                    <span className="text-dashboard-muted">{'SL: '}<span className="text-loss font-mono">{'₹'}{String(displayData.suggested_sl)}</span></span>
+                  )}
+                </div>
+              )}
+
+              {/* Market narrative: key_points array */}
+              {displayData.key_points && Array.isArray(displayData.key_points) && (
+                <ul className="space-y-1.5">
+                  {displayData.key_points.map((point: string, i: number) => (
+                    <li key={i} className="text-sm text-dashboard-text leading-relaxed flex gap-2">
+                      <span className="text-purple-400 flex-shrink-0">{'•'}</span>
+                      <span>{String(point)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {/* Market narrative: detailed_analysis */}
+              {displayData.detailed_analysis && (
+                <p className="text-xs text-dashboard-muted leading-relaxed mt-2">{String(displayData.detailed_analysis).slice(0, 300)}</p>
+              )}
+
+              {/* Generic fields */}
               {displayData.analysis && (
                 <p className="text-sm text-dashboard-text leading-relaxed">{String(displayData.analysis)}</p>
               )}
               {displayData.recommendation && (
                 <p className="text-sm text-dashboard-text leading-relaxed">{String(displayData.recommendation)}</p>
               )}
-              {displayData.explanation && (
-                <p className="text-sm text-dashboard-text leading-relaxed">{String(displayData.explanation)}</p>
-              )}
               {displayData.narrative && (
                 <p className="text-sm text-dashboard-text leading-relaxed">{String(displayData.narrative)}</p>
               )}
-              {displayData.message && !displayData.analysis && !displayData.recommendation && (
-                <p className="text-sm text-dashboard-text leading-relaxed">{String(displayData.message)}</p>
-              )}
 
-              {/* Fallback: show raw data keys if nothing else matched */}
-              {!displayData.analysis && !displayData.recommendation && !displayData.explanation && !displayData.narrative && !displayData.message && (
-                <p className="text-sm text-dashboard-muted font-mono text-xs whitespace-pre-wrap">
-                  {JSON.stringify(response, null, 2).slice(0, 500)}
+              {/* Risk warnings: count indicator */}
+              {displayData.warning_count !== undefined && (
+                <p className="text-xs text-dashboard-muted">
+                  {Number(displayData.warning_count) === 0
+                    ? '✅ No active risk warnings'
+                    : `⚠️ ${displayData.warning_count} active warning(s)`}
                 </p>
               )}
 
-              {/* Warnings */}
+              {/* Fallback message when nothing else rendered */}
+              {displayData.message
+                && !displayData.analysis && !displayData.recommendation
+                && !displayData.explanation && !displayData.narrative
+                && !displayData.key_points
+                && !displayData.reasoning
+                && !displayData.quality_rating
+                && displayData.warning_count === undefined && (
+                <p className="text-sm text-dashboard-text leading-relaxed">{String(displayData.message)}</p>
+              )}
+
+              {/* Warnings array */}
               {displayData.warnings && Array.isArray(displayData.warnings) && displayData.warnings.length > 0 && (
                 <div className="bg-loss/5 border border-loss/20 rounded-lg p-2">
                   <p className="text-[10px] uppercase text-loss font-bold mb-1">Warnings</p>
-                  {(displayData.warnings as string[]).map((w: string, i: number) => (
-                    <p key={i} className="text-xs text-loss/80">• {String(w)}</p>
+                  {displayData.warnings.map((w: unknown, i: number) => (
+                    <p key={i} className="text-xs text-loss/80">{'• '}{typeof w === 'string' ? w : String((w as Record<string, string>)?.message || JSON.stringify(w))}</p>
                   ))}
                 </div>
               )}
