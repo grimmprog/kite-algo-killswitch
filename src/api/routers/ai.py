@@ -153,7 +153,7 @@ def _get_ai_service(
 
     if not api_key:
         # Try the other provider as last resort
-        for fallback_provider in ["gemini", "claude"]:
+        for fallback_provider in ["openrouter", "gemini", "claude"]:
             api_key = os.environ.get(f"AI_{fallback_provider.upper()}_API_KEY", "")
             if api_key:
                 provider_str = fallback_provider
@@ -161,7 +161,7 @@ def _get_ai_service(
                 break
 
     if not api_key:
-        return None
+        return AITradingService(provider=AIProvider.SIMULATED, api_key="simulated")
 
     return AITradingService(provider=provider, api_key=api_key)
 
@@ -542,6 +542,186 @@ async def review_trade(
     )
 
 
+def _build_dynamic_user_state(user_id: int, db: Session, redis: RedisClient) -> Dict[str, Any]:
+    """Dynamically construct user's trading state from live broker data."""
+    import os
+    from datetime import datetime, timezone
+    from collections import defaultdict
+    from src.database.models.user_settings import UserSettings
+    
+    settings = (
+        db.query(UserSettings)
+        .filter(UserSettings.user_id == user_id)
+        .first()
+    )
+    
+    max_trades = settings.max_trades_per_day if settings else 5
+    capital = settings.capital if settings else 100000.0
+    
+    loss_limit = 4000.0
+    if settings:
+        if settings.daily_loss_type == "percentage":
+            loss_limit = (settings.daily_loss_value / 100.0) * settings.capital
+        else:
+            loss_limit = settings.daily_loss_value
+
+    start_hour = 9.25
+    end_hour = 15.5
+    if settings:
+        try:
+            start_parts = settings.trading_start_time.split(":")
+            start_hour = int(start_parts[0]) + int(start_parts[1]) / 60.0
+        except Exception:
+            pass
+        try:
+            end_parts = settings.trading_end_time.split(":")
+            end_hour = int(end_parts[0]) + int(end_parts[1]) / 60.0
+        except Exception:
+            pass
+
+    now = datetime.now()
+    current_hour = now.hour + now.minute / 60.0
+
+    current_trades_count = 0
+    daily_loss = 0.0
+    consecutive_losses = 0
+    last_loss_time_minutes = None
+    same_or_correlated_symbol = False
+
+    try:
+        from src.api.routers.daily_pnl import _get_kite_client
+        kite = _get_kite_client(db, user_id)
+        
+        trades = kite.trades()
+        orders = kite.orders()
+        positions = kite.positions()
+        
+        executed_orders = [o for o in orders if o.get("status") == "COMPLETE"]
+        current_trades_count = len(executed_orders)
+        
+        day_positions = positions.get("day", []) or positions.get("net", [])
+        total_pnl = sum(float(pos.get("pnl", 0)) for pos in day_positions)
+        
+        brokerage = len(executed_orders) * 20.0
+        sell_turnover = 0.0
+        total_turnover = 0.0
+        for trade in trades:
+            qty = int(trade.get("filled_quantity", trade.get("quantity", 0)))
+            price = float(trade.get("average_price", 0))
+            trade_value = qty * price
+            total_turnover += trade_value
+            if trade.get("transaction_type") == "SELL":
+                sell_turnover += trade_value
+        stt = sell_turnover * 0.0015
+        exchange_charges = total_turnover * 0.00053
+        gst = (brokerage + exchange_charges) * 0.18
+        total_charges = round(brokerage + stt + exchange_charges + gst, 2)
+        net_pnl = total_pnl - total_charges
+        
+        if net_pnl < 0:
+            daily_loss = abs(net_pnl)
+            
+        symbol_trades = defaultdict(list)
+        for t in trades:
+            symbol_trades[t["tradingsymbol"]].append(t)
+            
+        round_trips = []
+        for symbol, t_list in symbol_trades.items():
+            t_list.sort(key=lambda x: x.get("trade_time") or x.get("fill_timestamp") or "")
+            buy_qty = 0
+            sell_qty = 0
+            total_buy_val = 0.0
+            total_sell_val = 0.0
+            
+            for t in t_list:
+                qty = int(t.get("filled_quantity", t.get("quantity", 0)))
+                price = float(t.get("average_price", 0))
+                ttype = t.get("transaction_type")
+                
+                if ttype == "BUY":
+                    buy_qty += qty
+                    total_buy_val += qty * price
+                else:
+                    sell_qty += qty
+                    total_sell_val += qty * price
+                    
+                if buy_qty > 0 and sell_qty > 0 and buy_qty == sell_qty:
+                    pnl = total_sell_val - total_buy_val
+                    exit_time_str = t.get("trade_time") or t.get("fill_timestamp") or ""
+                    try:
+                        if isinstance(exit_time_str, str):
+                            if " " in exit_time_str:
+                                exit_time = datetime.strptime(exit_time_str, "%Y-%m-%d %H:%M:%S")
+                            else:
+                                exit_time = datetime.fromisoformat(exit_time_str.replace("Z", "+00:00"))
+                        else:
+                            exit_time = exit_time_str
+                    except Exception:
+                        exit_time = datetime.now()
+                        
+                    round_trips.append({
+                        "symbol": symbol,
+                        "pnl": pnl,
+                        "exit_time": exit_time
+                    })
+                    buy_qty = 0
+                    sell_qty = 0
+                    total_buy_val = 0.0
+                    total_sell_val = 0.0
+
+        round_trips.sort(key=lambda x: x["exit_time"])
+        
+        streak = 0
+        max_streak = 0
+        last_loss_time = None
+        last_loss_symbol = None
+        
+        for rt in round_trips:
+            if rt["pnl"] < 0:
+                streak += 1
+                max_streak = max(max_streak, streak)
+                last_loss_time = rt["exit_time"]
+                last_loss_symbol = rt["symbol"]
+            else:
+                streak = 0
+                
+        consecutive_losses = max_streak
+        
+        if last_loss_time:
+            last_loss_time_tz = last_loss_time.replace(tzinfo=timezone.utc) if last_loss_time.tzinfo is None else last_loss_time
+            for rt in round_trips:
+                rt_exit_tz = rt["exit_time"].replace(tzinfo=timezone.utc) if rt["exit_time"].tzinfo is None else rt["exit_time"]
+                if rt_exit_tz > last_loss_time_tz:
+                    diff_min = (rt_exit_tz - last_loss_time_tz).total_seconds() / 60.0
+                    if diff_min <= 5.0 and rt["symbol"] == last_loss_symbol:
+                        last_loss_time_minutes = diff_min
+                        same_or_correlated_symbol = True
+                        break
+                        
+    except Exception as e:
+        logger.warning(f"Could not build dynamic user state from broker: {e}")
+
+    pnl_pct = 0.0
+    if daily_loss > 0 and loss_limit > 0:
+        pnl_pct = (daily_loss / loss_limit) * 100.0
+
+    return {
+        "current_trades": current_trades_count,
+        "trades_today": current_trades_count,
+        "max_trades": max_trades,
+        "current_hour": current_hour,
+        "trading_start_hour": start_hour,
+        "trading_end_hour": end_hour,
+        "daily_loss": daily_loss,
+        "loss_limit": loss_limit,
+        "consecutive_losses": consecutive_losses,
+        "last_loss_time_minutes": last_loss_time_minutes,
+        "same_or_correlated_symbol": same_or_correlated_symbol,
+        "capital": capital,
+        "pnl_pct_of_threshold": pnl_pct,
+    }
+
+
 # ---------------------------------------------------------------------------
 # GET /api/v1/ai/risk-warnings
 # ---------------------------------------------------------------------------
@@ -553,28 +733,15 @@ async def get_risk_warnings(
     db: Session = Depends(get_db),
     redis: RedisClient = Depends(get_redis),
 ):
-    """Get active AI risk warnings for the authenticated user.
-
-    Detects behavioral anomalies (revenge trading, consecutive losses)
-    and market condition risks. Returns active warnings with severity.
-
-    Requirements: 24.1-24.6
-    """
+    """Get active AI risk warnings for the authenticated user."""
     ai_service = _get_ai_service(user_id, db)
     if not ai_service:
         return _ai_unavailable_response(
             "AI not configured. Set AI provider and API key in Settings."
         )
 
-    # Build user state from Redis (recent trades, current positions)
-    user_state: Dict[str, Any] = {}
-    user_state_key = f"user:{user_id}:trading_state"
-    state_json = redis.get(user_state_key)
-    if state_json:
-        try:
-            user_state = json.loads(state_json)
-        except (json.JSONDecodeError, TypeError):
-            pass
+    # Dynamically build user state from live trades
+    user_state = _build_dynamic_user_state(user_id, db, redis)
 
     # Fetch market data
     market_data: Dict[str, Any] = {}
@@ -641,15 +808,8 @@ async def get_risk_score(
         except (json.JSONDecodeError, TypeError, ValueError):
             pass
 
-    # Gather data for risk score computation
-    user_state: Dict[str, Any] = {}
-    user_state_key = f"user:{user_id}:trading_state"
-    state_json = redis.get(user_state_key)
-    if state_json:
-        try:
-            user_state = json.loads(state_json)
-        except (json.JSONDecodeError, TypeError):
-            pass
+    # Dynamically build user state from live trades
+    user_state = _build_dynamic_user_state(user_id, db, redis)
 
     # Compute risk score from available data
     risk_score = 0.0

@@ -27,6 +27,8 @@ class AIProvider(str, Enum):
 
     GEMINI = "gemini"
     CLAUDE = "claude"
+    OPENROUTER = "openrouter"
+    SIMULATED = "simulated"
 
 
 class AIQualityRating(str, Enum):
@@ -451,11 +453,219 @@ class AIProviderError(Exception):
     pass
 
 
+class OpenRouterClient(AIProviderClient):
+    """OpenRouter API client — routes to multiple models via OpenAI-compatible API."""
+
+    OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
+    DEFAULT_MODEL = "openai/gpt-4o"
+
+    def send_request(
+        self, prompt: str, context: Dict[str, Any], timeout: float = 15.0
+    ) -> Dict[str, Any]:
+        """Send request to OpenRouter API (OpenAI-compatible format).
+
+        Args:
+            prompt: The instruction/query for the LLM.
+            context: Sanitized context data.
+            timeout: Request timeout in seconds.
+
+        Returns:
+            Dictionary with the parsed response.
+
+        Raises:
+            AIProviderError: On API errors or timeouts.
+        """
+        import json
+        import requests as http_requests
+
+        full_prompt = f"{prompt}\n\nContext data:\n{json.dumps(context, indent=2, default=str)}"
+
+        payload = {
+            "model": self.DEFAULT_MODEL,
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "You are a professional trading analyst. Always respond with valid JSON only, no markdown formatting.",
+                },
+                {
+                    "role": "user",
+                    "content": full_prompt,
+                },
+            ],
+            "temperature": 0.3,
+            "max_tokens": 1024,
+        }
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {self.api_key}",
+        }
+
+        try:
+            resp = http_requests.post(
+                self.OPENROUTER_API_URL,
+                json=payload,
+                timeout=timeout,
+                headers=headers,
+            )
+        except http_requests.exceptions.Timeout:
+            raise TimeoutError(f"OpenRouter API timed out after {timeout}s")
+        except http_requests.exceptions.RequestException as e:
+            raise AIProviderError(f"OpenRouter API request failed: {e}")
+
+        if resp.status_code != 200:
+            raise AIProviderError(
+                f"OpenRouter API returned {resp.status_code}: {resp.text[:300]}"
+            )
+
+        try:
+            data = resp.json()
+        except (json.JSONDecodeError, ValueError):
+            raise AIProviderError("Failed to parse OpenRouter API response as JSON")
+
+        # Extract message content from OpenAI-compatible response
+        try:
+            choices = data.get("choices", [])
+            if not choices:
+                raise AIProviderError("OpenRouter returned no choices")
+
+            text = choices[0].get("message", {}).get("content", "")
+        except (IndexError, KeyError, TypeError) as e:
+            raise AIProviderError(f"Unexpected OpenRouter response structure: {e}")
+
+        # Parse the response text as JSON
+        try:
+            cleaned = text.strip()
+            if cleaned.startswith("```json"):
+                cleaned = cleaned[7:]
+            if cleaned.startswith("```"):
+                cleaned = cleaned[3:]
+            if cleaned.endswith("```"):
+                cleaned = cleaned[:-3]
+            cleaned = cleaned.strip()
+
+            result = json.loads(cleaned)
+            return result if isinstance(result, dict) else {"data": result}
+        except (json.JSONDecodeError, ValueError):
+            return {"analysis": text, "raw_response": True}
+
+
+class SimulatedClient(AIProviderClient):
+    """Simulated AI provider client that returns high-quality mockup responses."""
+
+    def send_request(
+        self, prompt: str, context: Dict[str, Any], timeout: float = 5.0
+    ) -> Dict[str, Any]:
+        """Return simulated JSON responses based on prompt keywords."""
+        import json
+        logger.info(f"Simulating AI request for prompt: {prompt[:50]}...")
+        
+        # 1. analyze_signal
+        if "professional trading signal analyst" in prompt:
+            is_bullish = context.get("trend") == "BULLISH" or "bullish" in str(context).lower()
+            quality = "Strong Setup" if is_bullish else "Acceptable Setup"
+            warnings = [] if is_bullish else ["Low volume — breakout may fail"]
+            explanation = (
+                "The setup shows a healthy pullback to the EMA20 support zone during a clear bullish trend. "
+                "Volume is supportive, making it an acceptable setup with high risk-adjusted probability."
+                if is_bullish else
+                "Decent setup, but entering in a lower volume environment increases false breakout risks. "
+                "Consider a smaller position size."
+            )
+            return {
+                "quality_rating": quality,
+                "warnings": warnings,
+                "explanation": explanation
+            }
+
+        # 2. suggest_entry
+        elif "suggest optimal entry point" in prompt or "bid/ask spread" in prompt:
+            entry = context.get("entry_price") or context.get("current_price") or 100.0
+            sl = context.get("stop_loss") or (entry * 0.95)
+            target = context.get("target_price") or (entry + abs(entry - sl) * 2)
+            
+            return {
+                "suggested_entry": float(entry),
+                "suggested_sl": str(sl),
+                "timing_recommendation": "Enter now — momentum building",
+                "entry_method": "market",
+                "sl_reasoning": "Stop loss placed below recent swing low and EMA20 support.",
+                "risk_reward_default": 2.0,
+                "risk_reward_ai": 2.0,
+                "entry_difference_pct": 0.0,
+                "entry_difference_highlighted": False
+            }
+
+        # 3. analyze_consolidation / rank_consolidations / assess_breakout
+        elif "consolidation" in prompt or "breakout" in prompt:
+            return {
+                "breakout_probability": 75.0,
+                "predicted_direction": "up",
+                "expected_move_pct": 8.5,
+                "false_breakout_risk": False,
+                "false_breakout_reasons": [],
+                "assessment": "Real-time consolidation range is tight and contracting. Breakout probability is high."
+            }
+
+        # 4. evaluate_exit
+        elif "exit" in prompt:
+            return {
+                "action": "hold",
+                "reasoning": "Position is moving in line with expectations. No immediate exit signals detected.",
+                "confidence": 85.0,
+                "warnings": []
+            }
+
+        # 5. generate_narrative
+        elif "market commentator" in prompt or "narrative" in prompt:
+            return {
+                "session_type": "mid_morning",
+                "key_points": [
+                    "Indices opening higher following positive global cues",
+                    "Nifty holding above key psychological support at 25,000",
+                    "Banking index showing relative strength with private bank buying",
+                    "FII/DII net flows remain positive in morning session"
+                ],
+                "bias": "bullish",
+                "expected_range": {"low": 24950.0, "high": 25300.0},
+                "key_levels": {"support": [24950.0, 25000.0], "resistance": [25250.0, 25300.0]},
+                "detailed_analysis": "Market is trading with a positive bias today. High volume breakout on Nifty above 25,100 confirms buyer dominance. We expect range-bound movement with an upward bias for the rest of the session."
+            }
+
+        # 6. review_trade
+        elif "trading mentor" in prompt or "review" in prompt:
+            return {
+                "grade": "B",
+                "entry_feedback": "Good entry execution on the EMA pullback. Sizing was well-managed.",
+                "exit_feedback": "Exit was slightly premature. Could have trailed stop loss to capture more profit.",
+                "sizing_feedback": "Position sizing was within the 2% maximum risk limit.",
+                "risk_feedback": "Risk-to-reward ratio was acceptable at 1.8:1.",
+                "optimal_comparison": "Holding for another 2 candles would have reached the full 2:1 target.",
+                "patterns_identified": ["EMA Pullback", "Bullish Consolidation"]
+            }
+
+        # 7. detect_risk_anomalies
+        elif "risk management" in prompt:
+            return {
+                "warnings": [],
+                "risk_score": 25.0,
+                "risk_level": "low",
+                "factors": [],
+                "explanation": "All behavior and risk parameters are within normal boundaries. No signs of revenge trading, consecutive loss streaks, or rule violations detected in today's session."
+            }
+
+        return {
+            "success": True,
+            "message": "Simulated AI analysis successful",
+            "data": {}
+        }
+
+
 def create_provider_client(provider: AIProvider, api_key: str) -> AIProviderClient:
     """Factory function to create the appropriate AI provider client.
 
     Args:
-        provider: The AI provider enum value (GEMINI or CLAUDE).
+        provider: The AI provider enum value (GEMINI, CLAUDE, or SIMULATED).
         api_key: The API key for authentication with the provider.
 
     Returns:
@@ -468,6 +678,10 @@ def create_provider_client(provider: AIProvider, api_key: str) -> AIProviderClie
         return GeminiClient(api_key)
     elif provider == AIProvider.CLAUDE:
         return ClaudeClient(api_key)
+    elif provider == AIProvider.OPENROUTER:
+        return OpenRouterClient(api_key)
+    elif provider == AIProvider.SIMULATED:
+        return SimulatedClient(api_key)
     else:
         raise ValueError(f"Unsupported AI provider: {provider}")
 
@@ -1991,9 +2205,21 @@ Be specific and quantitative where possible. Reference actual price levels and c
         has_critical = any(w.get("severity") == "critical" for w in warnings)
         requires_ack = any(w.get("requires_acknowledgment") for w in warnings)
 
+        if not warnings:
+            explanation = (
+                "All behavior and risk parameters are within normal boundaries. "
+                "No signs of revenge trading, consecutive loss streaks, or rule violations detected in today's session."
+            )
+        else:
+            explanation = (
+                f"Detected {len(warnings)} active risk factor(s) in your current session. "
+                "Please review the warnings below to ensure alignment with your trading plan."
+            )
+
         return {
             "warnings": warnings,
             "warning_count": len(warnings),
             "has_critical": has_critical,
             "requires_acknowledgment": requires_ack,
+            "explanation": explanation,
         }
